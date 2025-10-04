@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://localhost/index.html</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>http://localhost/about.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>http://localhost/project-raven.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>http://localhost/cambridge-analytica.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>http://localhost/panama-papers.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+</urlset>
+

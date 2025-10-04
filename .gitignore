@@ -1,0 +1,13 @@
+# Dependencies
+/node_modules
+
+# Build artifacts (Netlify will generate these)
+/build
+/dist
+/out
+
+# Logs and local files
+npm-debug.log*
+yarn-debug.log*
+.env
+.DS_Store
