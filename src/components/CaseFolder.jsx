@@ -16,7 +16,8 @@ const CaseFolder = ({ id, title, description, imgSrc, isVisible }) => {
     setIsPreview(false);
   };
 
-  const folderClassName = `case-folder ${isPreview ? 'preview' : ''} ${!isVisible ? 'hidden' : ''}`;
+  // The main container now has the cursor-target class
+  const folderClassName = `case-folder cursor-target ${isPreview ? 'preview' : ''} ${!isVisible ? 'hidden' : ''}`;
 
   return (
     <Link 

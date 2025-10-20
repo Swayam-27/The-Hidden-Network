@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import Loader from './components/Loader';
 import BreachSequence from './components/BreachSequence';
+import TargetCursor from './components/Cursor'; 
 
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const CasesPage = React.lazy(() => import('./pages/CasesPage'));
@@ -17,7 +18,6 @@ const AppState = {
     AUTHENTICATING: 'AUTHENTICATING',
     BREACHING: 'BREACHING',
     INSIDER: 'INSIDER',
-    // NEW STATE: Used when performing a console-triggered navigation
     NAVIGATING: 'NAVIGATING', 
 };
 
@@ -47,22 +47,13 @@ export default function App() {
         const breachShown = sessionStorage.getItem('breachAnimationShown') === 'true';
 
         if (!breachShown) {
-            // Logic for first-time login/breach sequence
             setBreachTarget(path);
             setAppState(AppState.BREACHING);
         } else {
-            // Logic for subsequent navigation (GOTO/ACCESS commands)
             if (!isInsider) login();
-
-            // 1. Temporarily show the Loader by setting the NAVIGATING state
             setAppState(AppState.NAVIGATING);
-            
-            // 2. Delay the actual navigation to let the Loader render briefly
-            // 500ms is a good duration for a smooth visual break
             setTimeout(() => {
                 navigate(path);
-                // 3. Revert to INSIDER state once navigation is initiated
-                // The new page will handle its own loading (via React.lazy Suspense)
                 setAppState(AppState.INSIDER); 
             }, 500); 
         }
@@ -75,19 +66,19 @@ export default function App() {
         if (breachTarget) navigate(breachTarget);
     }, [isInsider, login, navigate, breachTarget]);
 
-    // The state machine determines what to render
     if (appState === AppState.BREACHING) {
         return <BreachSequence onComplete={handleBreachComplete} />;
     }
     
-    // RENDER CHECK: If we are in the NAVIGATING state, show the full-screen Loader
     if (appState === AppState.NAVIGATING) {
         return <Loader />;
     }
     
-    // The main app layout that includes the footer
     return (
         <>
+           
+            <TargetCursor targetSelector=".cursor-target" />
+
             {appState === AppState.INSIDER && <Navbar />}
             <main>
                 <Suspense fallback={<Loader />}>

@@ -8,11 +8,13 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
 
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
+
   useEffect(() => {
     if (!startTyping) return;
-
     setShouldScroll(true);
-
     const welcomeShown =
       sessionStorage.getItem("welcomeMessageShown") === "true";
     if (welcomeShown) {
@@ -20,8 +22,6 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
       setReadyForInput(true);
       return;
     }
-
-    // The welcome message, now without any mention of "CIPHER"
     const timestamp = new Date();
     const sessionId = Math.random().toString(16).slice(2, 10).toUpperCase();
     const welcomeMessage = [
@@ -31,11 +31,9 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
       "System online. Awaiting input.",
       "Type [HELP] for a list of available commands.",
     ];
-
     let lineIndex = 0;
     let charIndex = 0;
     const timeouts = [];
-
     const type = () => {
       if (lineIndex >= welcomeMessage.length) {
         sessionStorage.setItem("welcomeMessageShown", "true");
@@ -43,7 +41,6 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
         return;
       }
       if (charIndex === 0) setLines((prev) => [...prev, ""]);
-
       const currentLineText = welcomeMessage[lineIndex];
       if (charIndex < currentLineText.length) {
         setLines((prev) => {
@@ -59,12 +56,10 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
         timeouts.push(setTimeout(type, 50));
       }
     };
-
     timeouts.push(setTimeout(type, 500));
     return () => timeouts.forEach(clearTimeout);
   }, [startTyping]);
 
-  // Effect to scroll to the bottom of the console
   useEffect(() => {
     if (shouldScroll) {
       endOfConsoleRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,7 +72,6 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
     const args = command.split(" ");
     const baseCommand = args[0];
     const newLines = [...lines, `C:\\Users\\Agent>${input}`];
-
     switch (baseCommand) {
       case "goto":
         if (args[1] === "cases" || args[1] === "about") {
@@ -93,16 +87,14 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
           newLines.push("  ACCESS command requires a case-id.");
         }
         break;
-
       case "help":
         newLines.push(
           "  [AVAILABLE COMMANDS]",
           "    HELP             - Displays this list of commands.",
-          "    GOTO CASES      - Takes you to the cases section",
-          "    GOTO ABOUT      - Takes you to the about section"
+          "    GOTO CASES       - Takes you to the cases section",
+          "    GOTO ABOUT       - Takes you to the about section"
         );
         break;
-
       case "clear":
         setLines([""]);
         setInput("");
@@ -125,14 +117,11 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
 
   return (
     <div className="console-wrapper">
-      <div className="console-container">
+      <div className="console-container" onClick={handleContainerClick}>
         <div className="console-header">
           <p>C:\\WINDOWS\\system32\\cmd.exe</p>
         </div>
-        <div
-          className="console-output"
-          onClick={() => inputRef.current?.focus()}
-        >
+        <div className="console-output">
           {lines.map((line, index) => (
             <p key={index}>{line}</p>
           ))}

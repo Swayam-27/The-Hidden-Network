@@ -1213,7 +1213,7 @@ a[href*="spline.design"] {
   color: var(--accent-teal);
   font-family: var(--font-heading);
   letter-spacing: 2px;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
   margin-bottom: 8px;
 }
 
@@ -1308,7 +1308,7 @@ a[href*="spline.design"] {
 
 .case-closed-stamp {
   position: absolute;
-  top: 150px;
+  top: 75px;
   left: 50%;
   transform: translateX(-50%) rotate(-15deg);
   border: 5px solid var(--secondary-red);
@@ -1321,6 +1321,7 @@ a[href*="spline.design"] {
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
   z-index: 10;
+  white-space: nowrap;
 }
 
 /* When the case-closed class is added, the stamp fades in */
@@ -1349,3 +1350,284 @@ a[href*="spline.design"] {
   text-align: center;
   line-height: 1.8;
 }
+
+
+/* --- NEW: THEMATIC SPY AUDIO PLAYER STYLES --- */
+
+.audio-player {
+  padding: 1rem;
+}
+
+audio {
+  width: 100%;
+  height: 40px;
+}
+
+/* --- Webkit (Chrome, Safari, Edge) Styles --- */
+
+/* Background of the entire controls panel */
+audio::-webkit-media-controls-panel {
+  background-color: #111;
+  border-radius: 5px;
+}
+
+/* Play/Pause & Volume Buttons */
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button {
+  background-color: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--glow-color-green);
+}
+audio::-webkit-media-controls-play-button:hover {
+  background-color: var(--text-color);
+}
+
+/* Hide the three-dot menu which contains the download button */
+audio::-webkit-media-controls-enclosure {
+  display: none;
+}
+
+/* Timeline Track */
+audio::-webkit-media-controls-timeline {
+  background-color: #000;
+  border-radius: 2px;
+  border: 1px solid var(--folder-border);
+  height: 6px;
+  margin: 0 15px;
+}
+
+/* Progress Bar (the part that fills up) */
+audio::-webkit-media-controls-timeline::-webkit-progress-value {
+  background-color: var(--accent-green);
+  box-shadow: 0 0 5px var(--glow-color-green);
+  border-radius: 2px;
+}
+
+/* Time Displays (e.g., 0:01 / 1:30) */
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+  color: var(--accent-green);
+  text-shadow: 0 0 5px var(--glow-color-green);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+/* --- NEW: CUSTOM AUDIO PLAYER COMPONENT STYLES --- */
+
+@keyframes pulseWave {
+  0% { transform: scaleY(1); opacity: 0.7; }
+  50% { transform: scaleY(1.2); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0.7; }
+}
+
+@keyframes flashText {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.custom-audio-player {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--accent-teal);
+  padding: 1rem;
+  font-family: var(--font-heading);
+  box-shadow: 0 0 15px var(--glow-color-teal);
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.play-pause-btn {
+  background: transparent;
+  border: 1px solid var(--accent-teal);
+  color: var(--accent-teal);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px;
+}
+.play-pause-btn:hover {
+  background-color: var(--accent-teal);
+  color: var(--main-bg);
+  box-shadow: 0 0 10px var(--glow-color-teal);
+}
+.play-pause-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
+.player-info {
+  flex-grow: 1;
+}
+
+.track-title {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.status-text {
+  color: #888;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+.status-text.streaming {
+  color: var(--accent-green);
+  animation: flashText 1.5s infinite;
+}
+
+.time-display {
+  color: var(--accent-teal);
+  font-size: 0.9rem;
+}
+
+.progress-bar-wrapper {
+  background-color: #000;
+  border: 1px solid var(--folder-border);
+  height: 10px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.progress-bar-fill {
+  background: var(--accent-teal);
+  height: 100%;
+  box-shadow: 0 0 10px var(--glow-color-teal);
+  position: relative;
+  overflow: hidden;
+}
+/* This creates the animated "waveform" effect */
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: pulseWave 1s infinite ease-in-out;
+}
+
+/* --- NEW "COMING SOON" OVERLAY STYLES --- */
+
+/* Add position relative to the main content area */
+.case-content {
+  position: relative;
+}
+
+.case-content.coming-soon-blur > *:not(.full-page-coming-soon-overlay) {
+  filter: blur(1.5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.full-page-coming-soon-overlay {
+  position: absolute;
+  top: 0;
+  left: -4rem; /* Extend to cover full page padding */
+  right: -4rem;
+  bottom: 0;
+  background: rgba(5, 6, 8, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 5;
+  padding: 2rem;
+}
+
+.full-page-coming-soon-overlay h2 {
+  font-family: var(--font-heading);
+  color: var(--accent-amber);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.full-page-coming-soon-overlay p {
+  color: #888;
+  font-style: italic;
+  max-width: 300px;
+}
+
+/* Hide all the old "coming soon" placeholder styles */
+.coming-soon-placeholder, .case-coming-soon-wrapper, .investigation-wrapper.coming-soon .coming-soon-overlay {
+  display: none;
+}
+/* --- NEW: STYLES FOR CURSOR & DOT GRID --- */
+
+/* 1. Custom Target Cursor (from react-bits) */
+.target-cursor-wrapper { position: fixed; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 9999; mix-blend-mode: difference; transform: translate(-50%, -50%); }
+.target-cursor-dot { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); will-change: transform; }
+.target-cursor-corner { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border: 3px solid #fff; will-change: transform; }
+.corner-tl { transform: translate(-150%, -150%); border-right: none; border-bottom: none; }
+.corner-tr { transform: translate(50%, -150%); border-left: none; border-bottom: none; }
+.corner-br { transform: translate(50%, 50%); border-left: none; border-top: none; }
+.corner-bl { transform: translate(-150%, 50%); border-right: none; border-top: none; }
+
+
+body:has(input[type="text"]:hover) .target-cursor-wrapper {
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+#console-input,
+#access-code-input,
+#decryption-code-input {
+  cursor: text; 
+}
+.console-container:hover ~ .target-cursor-wrapper,
+#access-terminal:hover ~ .target-cursor-wrapper,
+#decryption-terminal:hover ~ .target-cursor-wrapper {
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.console-container,
+#access-terminal,
+#decryption-terminal {
+  cursor: text;
+}
+
+#console-input,
+#access-code-input,
+#decryption-code-input {
+  caret-color: var(--accent-green);
+}
+/* --- NEW INTERACTIVE PUZZLE STYLES --- */
+.decryption-feedback-inline {
+  color: var(--secondary-red);
+  text-align: center;
+  margin-top: 1rem;
+  font-family: var(--font-heading);
+}
+
+.social-graph-puzzle label { display: block; text-align: center; margin-bottom: 1.5rem; }
+.social-graph-svg { width: 100%; height: auto; background-color: rgba(0,0,0,0.2); border: 1px solid var(--folder-border); }
+.graph-node { cursor: pointer; transition: all 0.2s ease; }
+.graph-node circle { fill: var(--accent-teal); stroke: var(--glow-color-teal); stroke-width: 2; }
+.graph-node text { fill: var(--text-color); font-family: var(--font-heading); text-anchor: middle; font-size: 0.9rem; }
+.graph-node:hover circle { fill: var(--accent-green); filter: url(#glow); }
+.graph-node:hover text { fill: var(--accent-green); }
+
+.personality-puzzle label { display: block; text-align: center; margin-bottom: 1rem; }
+.target-profile { background-color: rgba(0,0,0,0.2); border: 1px solid var(--folder-border); padding: 1rem; margin-bottom: 1.5rem; text-align: center; }
+.target-profile h3 { color: var(--secondary-red); font-family: var(--font-heading); margin-bottom: 0.5rem; }
+.target-profile p { font-style: italic; }
+.ocean-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+.ocean-option { background: transparent; border: 1px solid var(--accent-teal); color: var(--accent-teal); padding: 0.75rem; font-family: var(--font-heading); font-size: 1rem; cursor: pointer; transition: all 0.2s ease; }
+.ocean-option:hover { background: var(--accent-teal); color: var(--main-bg); }
+
+.timeline-puzzle label { display: block; text-align: center; margin-bottom: 1.5rem; }
+.timeline-cards-container { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+.timeline-card { background: var(--folder-bg); border: 1px solid var(--folder-border); padding: 1rem; color: var(--text-color); font-family: var(--font-primary); cursor: grab; transition: background-color 0.2s ease; }
+.timeline-card:active { cursor: grabbing; background: var(--folder-border); }

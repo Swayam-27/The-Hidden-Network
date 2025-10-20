@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// The structured content, defined outside the component for stability
 const missionBriefingContent = [
     { type: 'h2', text: 'Our Purpose' },
     { type: 'p', text: "I am the sole custodian of this archive, known around here as The Cipher. I navigate the shadows of the digital world, turning confusion into clarity. This is not a collection of stories it is a collection of insight drawn from the chaos of information. The Hidden Network exists to reveal the truth behind the noise and show what is actually happening in the digital ether." },
@@ -10,25 +9,19 @@ const missionBriefingContent = [
     { type: 'p', text: "I transform scattered and complex information into clear case files. Timelines are reconstructed, connections are highlighted, and the underlying story becomes visible. I do not create narratives or tell you what to think. I provide the framework to understand what really happened. The archive grows each day, a living map of what is hidden, forgotten, or deliberately obscured. If you are searching for clarity in the chaos, you have found the right place." },
 ];
 
-// This is the new, definitive RevealedContent component
 const RevealedContent = ({ animate }) => {
-    // All hooks are called at the top, before any conditions
     const [blocks, setBlocks] = useState(missionBriefingContent.map(b => ({ ...b, typedText: '' })));
     const blockIndexRef = useRef(0);
     const charIndexRef = useRef(0);
 
     useEffect(() => {
-        // The conditional logic is now INSIDE the hook, which is correct
         if (!animate) return;
-
         let timer;
         const type = () => {
             const currentBlockIndex = blockIndexRef.current;
             if (currentBlockIndex >= missionBriefingContent.length) return;
-
             const currentBlock = missionBriefingContent[currentBlockIndex];
             const currentCharIndex = charIndexRef.current;
-
             if (currentCharIndex < currentBlock.text.length) {
                 setBlocks(prev => {
                     const newBlocks = [...prev];
@@ -47,12 +40,10 @@ const RevealedContent = ({ animate }) => {
         return () => clearTimeout(timer);
     }, [animate]);
 
-    // The conditional logic is now in the return statement, which fixes all previous bugs
     return (
         <div className="about-content">
             {animate
-                ? // ANIMATED RENDER: Show text as it types
-                  blocks.map((block, index) => {
+                ? blocks.map((block, index) => {
                       if (index > blockIndexRef.current) return null;
                       const showCursor = index === blockIndexRef.current && block.typedText.length < block.text.length;
                       if (block.type === 'h2') {
@@ -60,8 +51,7 @@ const RevealedContent = ({ animate }) => {
                       }
                       return <p key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</p>;
                   })
-                : // STATIC RENDER: Show all text instantly on revisit
-                  missionBriefingContent.map((block, index) => (
+                : missionBriefingContent.map((block, index) => (
                       block.type === 'h2'
                           ? <h2 key={index}>{block.text}</h2>
                           : <p key={index}>{block.text}</p>
@@ -71,7 +61,6 @@ const RevealedContent = ({ animate }) => {
     );
 };
 
-
 const AboutPage = () => {
   const [step, setStep] = useState(sessionStorage.getItem('accessGranted') ? 'revealed' : 'authenticating');
   const [inputValue, setInputValue] = useState('');
@@ -79,6 +68,7 @@ const AboutPage = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [isFading, setIsFading] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const inputRef = useRef(null);
 
   const handleAccessAttempt = (e) => {
     e.preventDefault();
@@ -94,6 +84,10 @@ const AboutPage = () => {
     }
   };
   
+  const handleTerminalClick = () => {
+    inputRef.current?.focus();
+  };
+
   useEffect(() => {
       if (step === 'success') {
           const fadeTimer = setTimeout(() => setIsFading(true), 2000);
@@ -109,11 +103,11 @@ const AboutPage = () => {
       <div>
         <h1 className="about-page-title">[CLASSIFIED] Mission Briefing</h1>
         {step === 'authenticating' && (
-            <form id="access-terminal" className={isShaking ? 'shake' : ''} onSubmit={handleAccessAttempt}>
+            <form id="access-terminal" className={`cursor-target ${isShaking ? 'shake' : ''}`} onSubmit={handleAccessAttempt} onClick={handleTerminalClick}>
                 <div className="terminal-header">[ AUTHENTICATION REQUIRED ]</div>
                 <label htmlFor="access-code-input">ENTER ACCESS CODE:</label>
-                <p className="terminal-hint">HINT: The 6-letter access key is scattered across the Network's entry point.</p>
-                <input type="text" id="access-code-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} autoFocus />
+                <p className="terminal-hint">HINT: The 6-letter access key is scattered and blinking in order, across the Network's entry point.</p>
+                <input ref={inputRef} type="text" id="access-code-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} autoFocus />
                 <p id="access-feedback">{feedback}</p>
             </form>
         )}

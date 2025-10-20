@@ -6,8 +6,8 @@ import React, {
   useCallback,
 } from "react";
 import Spline from "@splinetool/react-spline";
-import Console from "../components/Console";
-import Directive from "../components/Directive"; // Import the new component
+import Console from "../components/Console.jsx";
+import Directive from "../components/Directive.jsx";
 
 // --- Preloader Component (No Changes) ---
 const Preloader = ({ onFinished }) => {
@@ -78,7 +78,7 @@ const Preloader = ({ onFinished }) => {
   );
 };
 
-// --- HomePage Component (UPDATED) ---
+// --- HomePage Component (UPDATED FOR MOBILE) ---
 const HomePage = ({ onLogin }) => {
   const [showPreloader, setShowPreloader] = useState(
     () => !sessionStorage.getItem("preloaderShown")
@@ -87,13 +87,10 @@ const HomePage = ({ onLogin }) => {
   const fragments = ["C", "I", "P", "H", "E", "R"];
 
   const [directiveVisible, setDirectiveVisible] = useState(false);
-  const [directiveFinished, setDirectiveFinished] = useState(false); // NEW state to track directive
+  const [directiveFinished, setDirectiveFinished] = useState(false);
   const directiveRef = useRef(null);
-
-  // NEW: State to control the scroll indicator's visibility
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
-  // Pulsing effect logic
   useEffect(() => {
     if (showPreloader) return;
     const pulseInterval = setInterval(() => {
@@ -102,16 +99,14 @@ const HomePage = ({ onLogin }) => {
     return () => clearInterval(pulseInterval);
   }, [showPreloader]);
 
-  // NEW: Effect to show the scroll indicator after a delay
   useEffect(() => {
     if (showPreloader) return;
     const timer = setTimeout(() => {
       setShowScrollIndicator(true);
-    }, 2500); // Show indicator 2.5s after preloader finishes
+    }, 2500);
     return () => clearTimeout(timer);
   }, [showPreloader]);
 
-  // Intersection Observer to detect when the directive/console section is scrolled to
   useEffect(() => {
     if (showPreloader || !directiveRef.current) return;
     const observer = new IntersectionObserver(
@@ -127,7 +122,6 @@ const HomePage = ({ onLogin }) => {
     return () => observer.disconnect();
   }, [showPreloader]);
 
-  // Preloader finish handler
   const handlePreloaderFinish = useCallback(() => {
     sessionStorage.setItem("preloaderShown", "true");
     setShowPreloader(false);
@@ -141,7 +135,8 @@ const HomePage = ({ onLogin }) => {
     <>
       <header className="hero">
         <video autoPlay muted loop playsInline id="bg-video">
-          <source src="/assets/background-video.mp4" type="video/mp4" />
+          <source src="/assets/background-video.mp4" media="(max-width: 768px)" />
+          <source src="/assets/background-video.mp4" />
         </video>
         <div className="video-overlay"></div>
         <div className="spline-background">
@@ -169,7 +164,6 @@ const HomePage = ({ onLogin }) => {
           ))}
         </div>
 
-        {/* UPDATED: Replaced the old indicator with the new container */}
         {showScrollIndicator && (
           <div className="scroll-prompt-container">
             <span className="scroll-text">SCROLL DOWN</span>
@@ -185,7 +179,7 @@ const HomePage = ({ onLogin }) => {
         />
         <Console
           onLogin={onLogin}
-          startTyping={directiveFinished} // Console typing starts AFTER directive finishes
+          startTyping={directiveFinished}
         />
       </div>
     </>
@@ -193,3 +187,4 @@ const HomePage = ({ onLogin }) => {
 };
 
 export default HomePage;
+

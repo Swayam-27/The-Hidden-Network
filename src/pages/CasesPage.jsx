@@ -8,14 +8,16 @@ const CasesPage = () => {
   const [filter, setFilter] = useState('all');
 
   return (
-    <div className="page-container">
+    <div className="page-container cases-page-container">
       <div className="section-header">
-        <h2>THE VAULT (UNLOCKED)</h2>
-        <div className="filter-controls">
-          <button onClick={() => setFilter('all')} className={filter === 'all' ? 'active' : ''}>ALL</button>
-          <button onClick={() => setFilter('cyber-warfare')} className={filter === 'cyber-warfare' ? 'active' : ''}>CYBER WARFARE</button>
-          <button onClick={() => setFilter('data-privacy')} className={filter === 'data-privacy' ? 'active' : ''}>DATA & PRIVACY</button>
-          <button onClick={() => setFilter('financial-crime')} className={filter === 'financial-crime' ? 'active' : ''}>FINANCIAL CRIME</button>
+        <div className="header-content-wrapper">
+          <h2>THE VAULT (UNLOCKED)</h2>
+          <div className="filter-controls">
+            <button onClick={() => setFilter('all')} className={`cursor-target ${filter === 'all' ? 'active' : ''}`}>ALL</button>
+            <button onClick={() => setFilter('cyber-warfare')} className={`cursor-target ${filter === 'cyber-warfare' ? 'active' : ''}`}>CYBER WARFARE</button>
+            <button onClick={() => setFilter('data-privacy')} className={`cursor-target ${filter === 'data-privacy' ? 'active' : ''}`}>DATA & PRIVACY</button>
+            <button onClick={() => setFilter('financial-crime')} className={`cursor-target ${filter === 'financial-crime' ? 'active' : ''}`}>FINANCIAL CRIME</button>
+          </div>
         </div>
       </div>
       <main className="case-files-container">
