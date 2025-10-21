@@ -9,7 +9,7 @@ import Spline from "@splinetool/react-spline";
 import Console from "../components/Console.jsx";
 import Directive from "../components/Directive.jsx";
 
-// --- Preloader Component (No Changes) ---
+// --- Preloader Component (with faster typing) ---
 const Preloader = ({ onFinished }) => {
   const [lines, setLines] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
@@ -30,7 +30,7 @@ const Preloader = ({ onFinished }) => {
           setTimeout(() => {
             setIsClosing(true);
             timeouts.push(setTimeout(onFinished, 800));
-          }, 1000)
+          }, 500) // Shorter pause at the end
         );
         return;
       }
@@ -46,18 +46,16 @@ const Preloader = ({ onFinished }) => {
           return newLines;
         });
         charIndex.current++;
-        const typingSpeed =
-          lineIndex.current > 1 && lineIndex.current < 8 ? 30 : 50;
+        const typingSpeed = 25; // Faster typing
         timeouts.push(setTimeout(type, typingSpeed));
       } else {
         lineIndex.current++;
         charIndex.current = 0;
-        const delayBetweenLines =
-          lineIndex.current > 1 && lineIndex.current < 8 ? 100 : 500;
+        const delayBetweenLines = 150; // Faster delay
         timeouts.push(setTimeout(type, delayBetweenLines));
       }
     };
-    timeouts.push(setTimeout(type, 500));
+    timeouts.push(setTimeout(type, 250));
     return () => timeouts.forEach(clearTimeout);
   }, [onFinished]);
 
@@ -78,7 +76,7 @@ const Preloader = ({ onFinished }) => {
   );
 };
 
-// --- HomePage Component (UPDATED FOR MOBILE) ---
+// --- HomePage Component (UPDATED with the fix) ---
 const HomePage = ({ onLogin }) => {
   const [showPreloader, setShowPreloader] = useState(
     () => !sessionStorage.getItem("preloaderShown")
@@ -127,15 +125,26 @@ const HomePage = ({ onLogin }) => {
     setShowPreloader(false);
   }, []);
 
+  // === NEW: Logic for Mobile Background ===
+  // This code runs in the component, bypassing the CSS build error.
+  const isMobile = window.innerWidth <= 768;
+  const heroStyle = isMobile ? {
+    backgroundImage: `linear-gradient(rgba(5, 6, 8, 0.9), rgba(5, 6, 8, 0.9)), url(/assets/static-background.jpg)`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center center',
+    backgroundRepeat: 'no-repeat',
+  } : {};
+  // ======================================
+
   if (showPreloader) {
     return <Preloader onFinished={handlePreloaderFinish} />;
   }
 
   return (
     <>
-      <header className="hero">
+      {/* Apply the inline style here */}
+      <header className="hero" style={heroStyle}>
         <video autoPlay muted loop playsInline id="bg-video">
-          <source src="/assets/background-video.mp4" media="(max-width: 768px)" />
           <source src="/assets/background-video.mp4" />
         </video>
         <div className="video-overlay"></div>
@@ -146,6 +155,14 @@ const HomePage = ({ onLogin }) => {
             <Spline scene="https://prod.spline.design/t6aIkI2ZVM4XbICx/scene.splinecode" />
           </Suspense>
         </div>
+
+        {/* This is the new PNG logo for mobile */}
+        <img 
+          src="/assets/logo-mobile.png" 
+          alt="The Hidden Network" 
+          className="hero-logo-mobile" 
+        />
+
         <div className="hero-subtitle">
           <p>Investigating the world’s most covert operations.</p>
           <p className="access-text">ACCESS GRANTED</p>
@@ -187,4 +204,3 @@ const HomePage = ({ onLogin }) => {
 };
 
 export default HomePage;
-

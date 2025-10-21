@@ -8,10 +8,6 @@ import './styles.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Router>
-      {/* 2. THIS IS THE FIX: 
-        The <AuthProvider> must wrap your <App /> component.
-        This provides the "isInsider" value to everything inside App.
-      */}
       <AuthProvider>
         <App />
       </AuthProvider>

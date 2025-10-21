@@ -29,14 +29,16 @@ const RevealedContent = ({ animate }) => {
                     return newBlocks;
                 });
                 charIndexRef.current++;
-                timer = setTimeout(type, 15);
+                // FASTER TYPING SPEED
+                timer = setTimeout(type, 8); // Was: 15ms
             } else {
                 blockIndexRef.current++;
                 charIndexRef.current = 0;
-                timer = setTimeout(type, 100);
+                // FASTER DELAY BETWEEN LINES
+                timer = setTimeout(type, 50); // Was: 100ms
             }
         };
-        timer = setTimeout(type, 500);
+        timer = setTimeout(type, 250); // Shorter initial delay
         return () => clearTimeout(timer);
     }, [animate]);
 

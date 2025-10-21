@@ -49,14 +49,16 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
           return newLines;
         });
         charIndex++;
-        timeouts.push(setTimeout(type, 20));
+        // FASTER TYPING SPEED
+        timeouts.push(setTimeout(type, 10)); // Was: 20ms
       } else {
         lineIndex++;
         charIndex = 0;
-        timeouts.push(setTimeout(type, 50));
+        // FASTER DELAY BETWEEN LINES
+        timeouts.push(setTimeout(type, 25)); // Was: 50ms
       }
     };
-    timeouts.push(setTimeout(type, 500));
+    timeouts.push(setTimeout(type, 250)); // Shorter initial delay
     return () => timeouts.forEach(clearTimeout);
   }, [startTyping]);
 
@@ -92,7 +94,7 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
           "  [AVAILABLE COMMANDS]",
           "    HELP             - Displays this list of commands.",
           "    GOTO CASES       - Takes you to the cases section",
-          "    GOTO ABOUT       - Takes you to the about section"
+          "    GGOTO ABOUT       - Takes you to the about section"
         );
         break;
       case "clear":
@@ -103,7 +105,7 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
         newLines.push("  > Designation: Unknown. Status: Agent.");
         break;
       case "cipher":
-        newLines.push("  > That key belongs elsewhere.");
+        newLines.push("  > The Librarian of this archive.");
         break;
       default:
         newLines.push(

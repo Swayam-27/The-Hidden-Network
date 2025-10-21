@@ -3,22 +3,39 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- PUZZLE SUB-COMPONENTS (For all puzzle types) ---
-
+// === UPDATED TextPuzzle Component (Handles visualText) ===
 const TextPuzzle = ({ puzzle, onSolve, shouldFocus }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
   useEffect(() => { if (shouldFocus && inputRef.current) inputRef.current.focus(); }, [shouldFocus]);
   const handleSubmit = (e) => { e.preventDefault(); onSolve(inputValue.trim().toUpperCase() === puzzle.answer.toUpperCase()); setInputValue(""); };
+
+  // Function to render the visual text safely using dangerouslySetInnerHTML
+  const createVisualMarkup = () => ({__html: puzzle.visualText});
+
   return (
     <form onSubmit={handleSubmit} onClick={() => inputRef.current?.focus()}>
       <label htmlFor="decryption-code-input">{puzzle.prompt}</label>
-      <input ref={inputRef} type="text" id="decryption-code-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} autoComplete="off" placeholder="ENTER DECRYPTION KEY..." />
+      {/* Conditionally render the visual text block if visualText exists */}
+      {puzzle.visualText && (
+        <div className="visual-puzzle-text" dangerouslySetInnerHTML={createVisualMarkup()} />
+      )}
+      <input
+        ref={inputRef}
+        type="text"
+        id="decryption-code-input"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        autoComplete="off"
+        placeholder="ENTER DECRYPTION KEY..."
+      />
       <button type="submit" className="decrypt-button">DECRYPT</button>
     </form>
   );
 };
+// =========================================================
 
+// --- Other Puzzle Components (Unchanged) ---
 const RedactionPuzzle = ({ puzzle, onSolve, shouldFocus }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -37,9 +54,10 @@ const RedactionPuzzle = ({ puzzle, onSolve, shouldFocus }) => {
 
 const KeywordPuzzle = ({ puzzle, onSolve }) => {
   const [feedback, setFeedback] = useState('');
-  const docParts = puzzle.documentText.split(new RegExp(`(${puzzle.answer})`, 'i'));
+  // Use case-insensitive regex for splitting
+  const docParts = puzzle.documentText.split(new RegExp(`(${puzzle.answer.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
   const handleClick = (isCorrect) => {
-    if (isCorrect) { onSolve(true); } 
+    if (isCorrect) { onSolve(true); }
     else { setFeedback('// INCORRECT KEYWORD IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
   };
   return (
@@ -47,11 +65,13 @@ const KeywordPuzzle = ({ puzzle, onSolve }) => {
       <label>{puzzle.prompt}</label>
       <div className="keyword-document">
         <p>
-          {docParts.map((part, index) => 
+          {docParts.map((part, index) =>
+            // Case-insensitive comparison
             part.toUpperCase() === puzzle.answer.toUpperCase() ? (
-              <span key={index} className="keyword-answer" onClick={() => handleClick(true)}>{part}</span>
+              <span key={index} className="keyword-answer cursor-target" onClick={() => handleClick(true)}>{part}</span>
             ) : (
-              <span key={index} onClick={() => handleClick(false)}>{part}</span>
+              // Make non-answer parts clickable too for consistent feedback
+              <span key={index} className="cursor-target" onClick={() => handleClick(false)}>{part}</span>
             )
           )}
         </p>
@@ -64,7 +84,7 @@ const KeywordPuzzle = ({ puzzle, onSolve }) => {
 const SocialGraphPuzzle = ({ puzzle, onSolve }) => {
     const [feedback, setFeedback] = useState('');
     const handleClick = (nodeName) => {
-        if (nodeName === puzzle.answer) { onSolve(true); } 
+        if (nodeName === puzzle.answer) { onSolve(true); }
         else { setFeedback('// INCORRECT NODE IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
     };
     return (
@@ -87,16 +107,18 @@ const SocialGraphPuzzle = ({ puzzle, onSolve }) => {
 const PersonalityProfilePuzzle = ({ puzzle, onSolve }) => {
     const [feedback, setFeedback] = useState('');
     const handleClick = (option) => {
-        if (option === puzzle.answer) { onSolve(true); } 
+        if (option === puzzle.answer) { onSolve(true); }
         else { setFeedback('// INCORRECT TRAIT IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
     };
     return (
         <div className="personality-puzzle">
             <label>{puzzle.prompt}</label>
-            <div className="target-profile">
-                <h3>TARGET PROFILE</h3>
-                <p><strong>LIKES:</strong> {puzzle.profile.likes.join(', ')}</p>
-            </div>
+            {puzzle.profile && ( // Only render profile if it exists
+              <div className="target-profile">
+                  <h3>TARGET PROFILE</h3>
+                  {puzzle.profile.likes && <p><strong>LIKES:</strong> {puzzle.profile.likes.join(', ')}</p>}
+              </div>
+            )}
             <div className="ocean-options">
                 {puzzle.options.map(option => (
                     <button key={option} type="button" className="ocean-option cursor-target" onClick={() => handleClick(option)}>
@@ -115,20 +137,22 @@ const SortableItem = ({ id }) => {
     return <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="timeline-card cursor-target">{id}</div>;
 };
 const TimelinePuzzle = ({ puzzle, onSolve }) => {
-    const [items, setItems] = useState(() => [...puzzle.events].sort(() => Math.random() - 0.5));
+    // Ensure puzzle.events is always an array before shuffling
+    const initialItems = Array.isArray(puzzle.events) ? [...puzzle.events].sort(() => Math.random() - 0.5) : [];
+    const [items, setItems] = useState(initialItems);
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
     const handleDragEnd = (event) => {
         const { active, over } = event;
         if (active && over && active.id !== over.id) {
-            setItems((items) => {
-                const oldIndex = items.indexOf(active.id);
-                const newIndex = items.indexOf(over.id);
-                return arrayMove(items, oldIndex, newIndex);
+            setItems((currentItems) => {
+                const oldIndex = currentItems.indexOf(active.id);
+                const newIndex = currentItems.indexOf(over.id);
+                return arrayMove(currentItems, oldIndex, newIndex);
             });
         }
     };
     const handleVerify = () => {
-        const isCorrect = JSON.stringify(items) === JSON.stringify(puzzle.events);
+        const isCorrect = Array.isArray(puzzle.events) && JSON.stringify(items) === JSON.stringify(puzzle.events);
         onSolve(isCorrect);
     };
     return (
@@ -146,17 +170,26 @@ const TimelinePuzzle = ({ puzzle, onSolve }) => {
     );
 };
 
-// --- Main Decryption Interface (Controller) ---
+
 const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
     const [feedback, setFeedback] = useState("");
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
 
+    useEffect(() => {
+        setFeedback("");
+        setIsUnlocking(false);
+        setIsShaking(false);
+    }, [puzzle]);
+
+
     const handleSolve = (isCorrect) => {
         if (isCorrect) {
             setFeedback("// DECRYPTION SUCCESSFUL... ACCESSING NEXT FRAGMENT. //");
             setIsUnlocking(true);
-            setTimeout(() => { onSuccess(); }, 2500);
+            setTimeout(() => {
+                onSuccess();
+             }, 2500); 
         } else {
             setFeedback("// ACCESS DENIED - INCORRECT KEY //");
             setIsShaking(true);
@@ -167,13 +200,14 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
     if (!puzzle) return null;
 
     const renderPuzzle = () => {
-        const puzzleType = puzzle.type || 'text';
+        const puzzleType = puzzle.type || 'text'; 
         switch (puzzleType) {
             case 'redaction': return <RedactionPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} />;
             case 'keyword': return <KeywordPuzzle puzzle={puzzle} onSolve={handleSolve} />;
             case 'social-graph': return <SocialGraphPuzzle puzzle={puzzle} onSolve={handleSolve} />;
             case 'personality-profile': return <PersonalityProfilePuzzle puzzle={puzzle} onSolve={handleSolve} />;
             case 'timeline-anomaly': return <TimelinePuzzle puzzle={puzzle} onSolve={handleSolve} />;
+            // TextPuzzle now handles both standard and visual text
             case 'text':
             default: return <TextPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} />;
         }
@@ -193,4 +227,3 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
 };
 
 export default DecryptionInterface;
-

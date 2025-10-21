@@ -94,8 +94,6 @@ const TargetCursor = ({ targetSelector = '.cursor-target', spinDuration = 2, hid
 
     window.addEventListener('scroll', scrollHandler, { passive: true });
 
-    //---------------------------------------------------------------
-    // This code for onclick animation
 
     window.addEventListener('mousemove', moveHandler);
     const mouseDownHandler = () => {
@@ -104,7 +102,7 @@ const TargetCursor = ({ targetSelector = '.cursor-target', spinDuration = 2, hid
       gsap.to(cursorRef.current, { scale: 0.9, duration: 0.2 });
     };
 
-    // Animate it back to its original size
+
     const mouseUpHandler = () => {
       if (!dotRef.current) return;
       gsap.to(dotRef.current, { scale: 1, duration: 0.3 });
@@ -114,7 +112,6 @@ const TargetCursor = ({ targetSelector = '.cursor-target', spinDuration = 2, hid
     window.addEventListener('mousedown', mouseDownHandler);
     window.addEventListener('mouseup', mouseUpHandler);
 
-    //----------------------------------------------------------------
     const enterHandler = e => {
       const directTarget = e.target;
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// NEW: Updated text with spans for styling
 const directiveLines = [
   "// INCOMING TRANSMISSION... SOURCE UNKNOWN //",
   "",
@@ -49,17 +48,19 @@ const Directive = ({ isVisible, onFinished }) => {
           return newLines;
         });
         charIndex.current++;
-        const typingSpeed = lineIndex.current > 1 ? 30 : 50;
+        // TYPING SPEED
+        const typingSpeed = 15; // Was: 30-50ms
         timeouts.push(setTimeout(type, typingSpeed));
       } else {
         lineIndex.current++;
         charIndex.current = 0;
-        const delayBetweenLines = lineIndex.current === 2 ? 600 : 300;
+        // FASTER DELAY 
+        const delayBetweenLines = lineIndex.current === 2 ? 300 : 150; // Was: 600/300ms
         timeouts.push(setTimeout(type, delayBetweenLines));
       }
     };
 
-    timeouts.push(setTimeout(type, 500));
+    timeouts.push(setTimeout(type, 250)); // Shorter initial delay
     return () => timeouts.forEach(clearTimeout);
   }, [isVisible, onFinished]);
 
@@ -70,7 +71,6 @@ const Directive = ({ isVisible, onFinished }) => {
         <div className="directive-body">
           {lines.map((line, index) => (
             <p key={index}>
-              {/* Use dangerouslySetInnerHTML to render the spans */}
               <span dangerouslySetInnerHTML={{ __html: line }} />
               {!isComplete &&
                 index === lineIndex.current &&
