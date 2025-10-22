@@ -226,26 +226,25 @@ export const caseData = {
       audioSrc: null,
       content: ( <p>"This file is different. It's about a leak... They called them the Panama Papers."</p> ),
     },
-    // CLUE FOR FIRST PUZZLE IS HERE
     overview: (
       <>
        <p>The Panama Papers case involved the unprecedented leak of 11.5 million confidential documents from the Panamanian law firm Mossack Fonseca. The leak exposed a global system of offshore shell corporations used by the world's elite to hide wealth, evade taxes, and conduct illicit activities.</p>
        <p>The firm specialized in tools for anonymity, such as creating <strong>shell companies</strong> to own assets and providing <strong>nominee directors</strong>—fake owners who sign paperwork—to keep the client's name out of public records.</p>
       </>
     ),
-    // CLUES FOR EPISODE PUZZLES ARE IN HERE
     timeline: (
       <ul>
-        <li><strong>1977:</strong> Jürgen Mossack establishes law firm in Panama City.</li>
-        <li><strong>1986:</strong> Ramón Fonseca joins firm; Mossack Fonseca begins massive expansion.</li>
-        <li><strong>2015:</strong> Anonymous whistleblower <strong>"John Doe"</strong> contacts German journalist Bastian Obermayer, offering <strong>2.6 terabytes</strong> of data.</li>
-        <li><strong>2016 April:</strong> <strong>International Consortium of Investigative Journalists (ICIJ)</strong> publishes Panama Papers exposé; reveals offshore holdings of world leaders, celebrities, and criminals; <strong>Iceland's PM resigns</strong> within days.</li>
-        <li><strong>2017 October:</strong> <strong>Maltese</strong> journalist Daphne Caruana Galizia assassinated by car bomb after investigating Panama Papers connections to <strong>Malta's</strong> government.</li>
-        <li><strong>2018 March:</strong> Mossack Fonseca announces closure.</li>
+        <li><strong>1977:</strong> Jürgen Mossack establishes law firm in Panama City, specializing in offshore corporate structures and tax avoidance services.</li>
+        <li><strong>1986:</strong> Ramón Fonseca joins firm; Mossack Fonseca begins massive expansion, eventually creating over 210,000 shell companies worldwide.</li>
+        <li><strong>2015:</strong> Anonymous whistleblower "John Doe" contacts German journalist Bastian Obermayer, offering 11.5 million confidential documents from Mossack Fonseca.</li>
+        <li><strong>2016 April:</strong> International Consortium of Investigative Journalists (ICIJ) publishes Panama Papers exposé; reveals offshore holdings of world leaders, celebrities, and criminals; Iceland's PM resigns within days.</li>
+        <li><strong>2017 October:</strong> Maltese journalist Daphne Caruana Galizia assassinated by car bomb after investigating Panama Papers connections to Malta's government.</li>
+        <li><strong>2018 March:</strong> Mossack Fonseca announces closure due to "economic and reputational damage"; founders arrested but later acquitted in 2022; global tax reforms implemented worldwide.</li>
       </ul>
+
     ),
 
-    firstPuzzle: { // Puzzle 1 - Unlocks Part 1
+    firstPuzzle: { // Puzzle 1 (Graph) - Unlocks Part 1 - REMAINS THE SAME
       type: "social-graph",
       prompt: "The 'Case Overview' explained how Mossack Fonseca used 'nominee directors' to hide a client's identity. Click the node that represents the FAKE owner used to sign the paperwork.",
       nodes: [
@@ -253,7 +252,7 @@ export const caseData = {
         { id: 2, name: "Mossack Fonseca (Law Firm)", x: 325, y: 200 },
         { id: 3, name: "Nominee Director (Fake Owner)", x: 500, y: 100 },
         { id: 4, name: "Panamanian Shell Co.", x: 325, y: 300 },
-        { id: 5, name: "Asset", x: 325, y: 70 }
+        { id: 5, name: "Asset", x: 325, y: 80 }
       ],
       answer: "Nominee Director (Fake Owner)"
     },
@@ -263,36 +262,44 @@ export const caseData = {
         title: "PART 1 — THE SHADOW ECONOMY",
         type: "audio-debrief",
         audioSrc: null,
-        // CLUE REMOVED.
-        content: ( <p>This debriefing explains how Jürgen Mossack and Ramón Fonseca built Mossack Fonseca into a global leader in offshore services. They specialized in creating shell companies, nominee directors, and bearer shares to help clients hide their wealth and avoid taxes.</p> ),
-        puzzle: { // Puzzle 2 - Unlocks Part 2
+        content: ( <p>This debriefing explains how Mossack Fonseca built its empire by specializing in offshore services like shell companies and nominee directors, effectively providing anonymity for its clients.</p> ),
+        // === CORRECTED PUZZLE 2 ("Leak Initiated" Theme - Redaction) ===
+        puzzle: { // Unlocks Part 2
           type: "redaction",
-          documentText: "FIRST CONTACT LOG: SOURCE: [REDACTED]. RECIPIENT: Süddeutsche Zeitung. MESSAGE: 'Hello. This is John Doe. Interested in data?'",
-          prompt: "The 'Key Events Timeline' identifies the pseudonym of the whistleblower. De-redact the document.",
-          answer: "JOHN DOE"
+          documentText: "[INCOMING MESSAGE — UNKNOWN SOURCE]\nHello. This is [REDACTED]. Interested in data?\n> More than Cablegate...", // Themed text
+          prompt: "A nameless signal reached Germany. The 'Key Events Timeline' identifies the codename of the one who started the largest leak in history. De-redact the transmission log.",
+          answer: "JOHN DOE" // Clue is in the Timeline (2015 entry)
         }
+        // ============================================================
       },
       {
-        title: "PART 2 — GLOBAL COLLABORATION",
+        title: "PART 2 — THE WHISTLEBLOWER",
         type: "audio-debrief",
         audioSrc: null,
-        content: ( <p>Faced with 11.5 million documents, the German newspaper contacted the ICIJ. This led to a secret, year-long global investigation involving hundreds of journalists, culminating in a simultaneous global exposé that had immediate political consequences.</p> ),
-        // === NEW "GLITCH TEXT" PUZZLE ===
-        puzzle: { // Puzzle 3 - Unlocks Part 3
-          type: "text", 
-          visualText: "AX7<span class='glitch'>I</span>Q9%B<span class='glitch'>C</span>PL{K}<span class='glitch'>I</span>Z3!G<span class='glitch'>J</span>W#",
-          prompt: "An intercepted data fragment contains a hidden acronym related to the global collaboration. Identify the 4-letter sequence blinking within the noise below:",
-          answer: "ICIJ" 
+        content: ( <p>In 2015, 'John Doe' contacted Süddeutsche Zeitung. Facing 2.6TB of data, they partnered with the ICIJ, leading to a secret global investigation and the explosive publication in April 2016 that triggered immediate political fallout.</p> ),
+        // === CORRECTED PUZZLE 3 ("The Fallout" Theme - Descriptive Timeline) ===
+        puzzle: { // Unlocks Part 3
+          type: "timeline-anomaly",
+          prompt: "The leak triggered the firm's collapse over several years. Arrange the fallout in the correct chronological order using clues from the 'Key Events Timeline'.",
+          // Longer, descriptive events like Cambridge Analytica
+          events: [
+            "Global investigations are launched by tax authorities after the ICIJ exposé.", // April 2016
+            "Mossack Fonseca announces the firm is shutting down due to reputational damage.", // March 2018
+            "Founders Jürgen Mossack and Ramón Fonseca are arrested on money laundering charges.", // ~2018/2019
+            "A Panamanian judge acquits the founders, citing insufficient evidence." // 2022
+          ],
+          answer: "CORRECT_SEQUENCE" // User must order based on Timeline dates
         }
+        // =====================================================================
       },
       {
         title: "PART 3 — THE RECKONING",
         type: "audio-debrief",
         audioSrc: null,
         content: (
-          <p>The consequences were severe. In 2017, investigative journalist <strong>Daphne Caruana Galizia</strong> was assassinated by a car bomb in her home country for her work exposing its links to the Panama Papers. While Mossack Fonseca eventually shut down, its founders were acquitted in 2022.</p>
+          <p>The consequences were severe, including the assassination of Maltese journalist Daphne Caruana Galizia in 2017. While Mossack Fonseca eventually shut down, its founders were ultimately acquitted, though the scandal forced global financial reforms.</p>
         ),
-        puzzle: null, // Last episode, no puzzle
+        puzzle: null, 
       },
     ],
     conclusion: {

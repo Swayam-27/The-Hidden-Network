@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// RevealedContent component (assuming it's defined correctly above or imported)
 const missionBriefingContent = [
     { type: 'h2', text: 'Our Purpose' },
     { type: 'p', text: "I am the sole custodian of this archive, known around here as The Cipher. I navigate the shadows of the digital world, turning confusion into clarity. This is not a collection of stories it is a collection of insight drawn from the chaos of information. The Hidden Network exists to reveal the truth behind the noise and show what is actually happening in the digital ether." },
@@ -29,16 +30,14 @@ const RevealedContent = ({ animate }) => {
                     return newBlocks;
                 });
                 charIndexRef.current++;
-                // FASTER TYPING SPEED
-                timer = setTimeout(type, 8); // Was: 15ms
+                timer = setTimeout(type, 8); // Faster typing
             } else {
                 blockIndexRef.current++;
                 charIndexRef.current = 0;
-                // FASTER DELAY BETWEEN LINES
-                timer = setTimeout(type, 50); // Was: 100ms
+                timer = setTimeout(type, 50); // Faster delay
             }
         };
-        timer = setTimeout(type, 250); // Shorter initial delay
+        timer = setTimeout(type, 250);
         return () => clearTimeout(timer);
     }, [animate]);
 
@@ -47,7 +46,10 @@ const RevealedContent = ({ animate }) => {
             {animate
                 ? blocks.map((block, index) => {
                       if (index > blockIndexRef.current) return null;
-                      const showCursor = index === blockIndexRef.current && block.typedText.length < block.text.length;
+                      const isCurrentBlock = index === blockIndexRef.current;
+                      const isTypingComplete = block.typedText.length === block.text.length;
+                      const showCursor = isCurrentBlock && !isTypingComplete;
+
                       if (block.type === 'h2') {
                           return <h2 key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</h2>;
                       }
@@ -63,6 +65,8 @@ const RevealedContent = ({ animate }) => {
     );
 };
 
+
+// --- AboutPage Component (UPDATED with isMobile check) ---
 const AboutPage = () => {
   const [step, setStep] = useState(sessionStorage.getItem('accessGranted') ? 'revealed' : 'authenticating');
   const [inputValue, setInputValue] = useState('');
@@ -71,6 +75,14 @@ const AboutPage = () => {
   const [isFading, setIsFading] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const inputRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleAccessAttempt = (e) => {
     e.preventDefault();
@@ -85,10 +97,8 @@ const AboutPage = () => {
       setTimeout(() => { setIsShaking(false); setFeedback(''); }, 1000);
     }
   };
-  
-  const handleTerminalClick = () => {
-    inputRef.current?.focus();
-  };
+
+  const handleTerminalClick = () => inputRef.current?.focus();
 
   useEffect(() => {
       if (step === 'success') {
@@ -104,21 +114,37 @@ const AboutPage = () => {
     <div className={containerClass}>
       <div>
         <h1 className="about-page-title">[CLASSIFIED] Mission Briefing</h1>
+
         {step === 'authenticating' && (
-            <form id="access-terminal" className={`cursor-target ${isShaking ? 'shake' : ''}`} onSubmit={handleAccessAttempt} onClick={handleTerminalClick}>
+            <form id="access-terminal" className={`cursor-target ${isShaking ? 'shake' : ''}`} onSubmit={handleAccessAttempt} onClick={handleTerminalClick} noValidate>
                 <div className="terminal-header">[ AUTHENTICATION REQUIRED ]</div>
                 <label htmlFor="access-code-input">ENTER ACCESS CODE:</label>
                 <p className="terminal-hint">HINT: The 6-letter access key is scattered and blinking in order, across the Network's entry point.</p>
-                <input ref={inputRef} type="text" id="access-code-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} autoFocus />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  id="access-code-input"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value.toUpperCase())} // Force uppercase
+                  autoFocus
+                  maxLength={6}
+                  autoCapitalize="characters"
+                  style={{ textTransform: 'uppercase' }}
+                 />
+                {isMobile && (
+                  <button type="submit" className="decrypt-button" style={{ marginTop: '1.5rem' }}>AUTHENTICATE</button>
+                )}
                 <p id="access-feedback">{feedback}</p>
             </form>
         )}
+
         {step === 'success' && (
             <div id="access-terminal" className={`success-message ${isFading ? 'fading-out' : ''}`}>
                 <div className="success-title">AUTHENTICATION SUCCESSFUL</div>
                 <p className="success-subtitle">DECRYPTING BRIEFING...</p>
             </div>
         )}
+
         {step === 'revealed' && <RevealedContent animate={shouldAnimate} />}
       </div>
     </div>

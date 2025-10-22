@@ -3,92 +3,87 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// === UPDATED TextPuzzle Component (Handles visualText) ===
-const TextPuzzle = ({ puzzle, onSolve, shouldFocus }) => {
+// --- Puzzle Sub-Components (with isDisabled prop and fixes) ---
+
+const TextPuzzle = ({ puzzle, onSolve, shouldFocus, isDisabled }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
-  useEffect(() => { if (shouldFocus && inputRef.current) inputRef.current.focus(); }, [shouldFocus]);
-  const handleSubmit = (e) => { e.preventDefault(); onSolve(inputValue.trim().toUpperCase() === puzzle.answer.toUpperCase()); setInputValue(""); };
-
-  // Function to render the visual text safely using dangerouslySetInnerHTML
+  useEffect(() => { if (shouldFocus && !isDisabled && inputRef.current) inputRef.current.focus(); }, [shouldFocus, isDisabled]);
+  const handleSubmit = (e) => { e.preventDefault(); if (!isDisabled) onSolve(inputValue.trim().toUpperCase() === puzzle.answer.toUpperCase()); if(!isDisabled) setInputValue(""); };
   const createVisualMarkup = () => ({__html: puzzle.visualText});
 
   return (
-    <form onSubmit={handleSubmit} onClick={() => inputRef.current?.focus()}>
+    <form onSubmit={handleSubmit} onClick={() => {if (!isDisabled) inputRef.current?.focus()}}>
       <label htmlFor="decryption-code-input">{puzzle.prompt}</label>
-      {/* Conditionally render the visual text block if visualText exists */}
       {puzzle.visualText && (
         <div className="visual-puzzle-text" dangerouslySetInnerHTML={createVisualMarkup()} />
       )}
       <input
-        ref={inputRef}
-        type="text"
-        id="decryption-code-input"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        autoComplete="off"
+        ref={inputRef} type="text" id="decryption-code-input" value={inputValue}
+        onChange={(e) => setInputValue(e.target.value.toUpperCase())} autoComplete="off"
         placeholder="ENTER DECRYPTION KEY..."
+        disabled={isDisabled}
+        style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}
       />
-      <button type="submit" className="decrypt-button">DECRYPT</button>
+      <button type="submit" className="decrypt-button" disabled={isDisabled} style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}>DECRYPT</button>
     </form>
   );
 };
-// =========================================================
 
-// --- Other Puzzle Components (Unchanged) ---
-const RedactionPuzzle = ({ puzzle, onSolve, shouldFocus }) => {
+const RedactionPuzzle = ({ puzzle, onSolve, shouldFocus, isDisabled }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
-  useEffect(() => { if (shouldFocus && inputRef.current) inputRef.current.focus(); }, [shouldFocus]);
-  const handleSubmit = (e) => { e.preventDefault(); onSolve(inputValue.trim().toUpperCase() === puzzle.answer.toUpperCase()); setInputValue(""); };
+  useEffect(() => { if (shouldFocus && !isDisabled && inputRef.current) inputRef.current.focus(); }, [shouldFocus, isDisabled]);
+  const handleSubmit = (e) => { e.preventDefault(); if (!isDisabled) onSolve(inputValue.trim().toUpperCase() === puzzle.answer.toUpperCase()); if(!isDisabled) setInputValue(""); };
   const createMarkup = () => ({__html: puzzle.documentText.replace(/\[REDACTED\]/g, '<span class="redacted-block">██████████████</span>')});
   return (
-    <form onSubmit={handleSubmit} onClick={() => inputRef.current?.focus()}>
+    <form onSubmit={handleSubmit} onClick={() => {if (!isDisabled) inputRef.current?.focus()}}>
       <label htmlFor="decryption-code-input">{puzzle.prompt}</label>
       <div className="redacted-document"><p dangerouslySetInnerHTML={createMarkup()} /></div>
-      <input ref={inputRef} type="text" id="decryption-code-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} autoComplete="off" placeholder="DE-REDACT THE DOCUMENT..." />
-      <button type="submit" className="decrypt-button">DECRYPT</button>
+      <input
+        ref={inputRef} type="text" id="decryption-code-input" value={inputValue}
+        onChange={(e) => setInputValue(e.target.value.toUpperCase())} autoComplete="off"
+        placeholder="DE-REDACT THE DOCUMENT..."
+        disabled={isDisabled}
+        style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}
+      />
+      <button type="submit" className="decrypt-button" disabled={isDisabled} style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}>DECRYPT</button>
     </form>
   );
 };
 
-const KeywordPuzzle = ({ puzzle, onSolve }) => {
-  const [feedback, setFeedback] = useState('');
-  // Use case-insensitive regex for splitting
-  const docParts = puzzle.documentText.split(new RegExp(`(${puzzle.answer.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
-  const handleClick = (isCorrect) => {
-    if (isCorrect) { onSolve(true); }
-    else { setFeedback('// INCORRECT KEYWORD IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
+const KeywordPuzzle = ({ puzzle, onSolve, isDisabled }) => {
+  const docParts = puzzle.documentText.split(new RegExp(`(${puzzle.answer.replace(/[-\/^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
+
+  const handleClick = (isCorrectGuess) => {
+    if (isDisabled) return;
+    onSolve(isCorrectGuess);
   };
   return (
-    <div className="keyword-puzzle-container">
+    <div className="keyword-puzzle-container" style={isDisabled ? { pointerEvents: 'none', filter: 'brightness(0.7)' } : {}}>
       <label>{puzzle.prompt}</label>
       <div className="keyword-document">
         <p>
           {docParts.map((part, index) =>
-            // Case-insensitive comparison
             part.toUpperCase() === puzzle.answer.toUpperCase() ? (
               <span key={index} className="keyword-answer cursor-target" onClick={() => handleClick(true)}>{part}</span>
             ) : (
-              // Make non-answer parts clickable too for consistent feedback
               <span key={index} className="cursor-target" onClick={() => handleClick(false)}>{part}</span>
             )
           )}
         </p>
       </div>
-      {feedback && <p className="decryption-feedback-inline">{feedback}</p>}
     </div>
   );
 };
 
-const SocialGraphPuzzle = ({ puzzle, onSolve }) => {
-    const [feedback, setFeedback] = useState('');
+const SocialGraphPuzzle = ({ puzzle, onSolve, isDisabled }) => {
     const handleClick = (nodeName) => {
-        if (nodeName === puzzle.answer) { onSolve(true); }
-        else { setFeedback('// INCORRECT NODE IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
+        if (isDisabled) return;
+        onSolve(nodeName === puzzle.answer);
     };
     return (
-        <div className="social-graph-puzzle">
+        <div className="social-graph-puzzle" style={isDisabled ? { pointerEvents: 'none', filter: 'brightness(0.7)' } : {}}>
             <label>{puzzle.prompt}</label>
             <svg viewBox="0 0 650 400" className="social-graph-svg">
                 <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
@@ -99,21 +94,19 @@ const SocialGraphPuzzle = ({ puzzle, onSolve }) => {
                     </g>
                 ))}
             </svg>
-            {feedback && <p className="decryption-feedback-inline">{feedback}</p>}
         </div>
     );
 };
 
-const PersonalityProfilePuzzle = ({ puzzle, onSolve }) => {
-    const [feedback, setFeedback] = useState('');
+const PersonalityProfilePuzzle = ({ puzzle, onSolve, isDisabled }) => {
     const handleClick = (option) => {
-        if (option === puzzle.answer) { onSolve(true); }
-        else { setFeedback('// INCORRECT TRAIT IDENTIFIED //'); setTimeout(() => setFeedback(''), 1500); }
+        if (isDisabled) return;
+        onSolve(option === puzzle.answer);
     };
     return (
         <div className="personality-puzzle">
             <label>{puzzle.prompt}</label>
-            {puzzle.profile && ( // Only render profile if it exists
+            {puzzle.profile && (
               <div className="target-profile">
                   <h3>TARGET PROFILE</h3>
                   {puzzle.profile.likes && <p><strong>LIKES:</strong> {puzzle.profile.likes.join(', ')}</p>}
@@ -121,42 +114,68 @@ const PersonalityProfilePuzzle = ({ puzzle, onSolve }) => {
             )}
             <div className="ocean-options">
                 {puzzle.options.map(option => (
-                    <button key={option} type="button" className="ocean-option cursor-target" onClick={() => handleClick(option)}>
+                    <button key={option} type="button" className="ocean-option cursor-target"
+                            onClick={() => handleClick(option)}
+                            disabled={isDisabled}
+                            style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}
+                    >
                         {option.toUpperCase()}
                     </button>
                 ))}
             </div>
-            {feedback && <p className="decryption-feedback-inline">{feedback}</p>}
         </div>
     );
 };
 
+// === FIX: Correctly renders the text inside the div ===
 const SortableItem = ({ id }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-    const style = { transform: CSS.Transform.toString(transform), transition };
-    return <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="timeline-card cursor-target">{id}</div>;
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        touchAction: 'none' // Helps with drag interaction on touch devices
+    };
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="timeline-card cursor-target">
+            {id}
+        </div>
+    );
 };
-const TimelinePuzzle = ({ puzzle, onSolve }) => {
-    // Ensure puzzle.events is always an array before shuffling
+
+const TimelinePuzzle = ({ puzzle, onSolve, isDisabled }) => {
     const initialItems = Array.isArray(puzzle.events) ? [...puzzle.events].sort(() => Math.random() - 0.5) : [];
     const [items, setItems] = useState(initialItems);
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+    useEffect(() => {
+        setItems(Array.isArray(puzzle.events) ? [...puzzle.events].sort(() => Math.random() - 0.5) : []);
+    }, [puzzle.events]);
+
+    // === FIX: Simplified PointerSensor initialization ===
+    // Remove activationConstraint to make dragging start immediately
+    const sensors = useSensors(useSensor(PointerSensor));
+    // ===================================================
+
     const handleDragEnd = (event) => {
+        if (isDisabled) return;
         const { active, over } = event;
         if (active && over && active.id !== over.id) {
             setItems((currentItems) => {
                 const oldIndex = currentItems.indexOf(active.id);
                 const newIndex = currentItems.indexOf(over.id);
-                return arrayMove(currentItems, oldIndex, newIndex);
+                // Ensure indices are valid before moving
+                if (oldIndex !== -1 && newIndex !== -1) {
+                    return arrayMove(currentItems, oldIndex, newIndex);
+                }
+                return currentItems; // Return unchanged if indices are invalid
             });
         }
     };
     const handleVerify = () => {
-        const isCorrect = Array.isArray(puzzle.events) && JSON.stringify(items) === JSON.stringify(puzzle.events);
-        onSolve(isCorrect);
+        if (isDisabled) return;
+        const isCorrectGuess = Array.isArray(puzzle.events) && JSON.stringify(items) === JSON.stringify(puzzle.events);
+        onSolve(isCorrectGuess);
     };
     return (
-        <div className="timeline-puzzle">
+        <div className="timeline-puzzle" style={isDisabled ? { pointerEvents: 'none', filter: 'brightness(0.7)' } : {}}>
             <label>{puzzle.prompt}</label>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={items} strategy={verticalListSortingStrategy}>
@@ -165,65 +184,128 @@ const TimelinePuzzle = ({ puzzle, onSolve }) => {
                     </div>
                 </SortableContext>
             </DndContext>
-            <button type="button" className="decrypt-button cursor-target" onClick={handleVerify}>VERIFY SEQUENCE</button>
+            <button type="button" className="decrypt-button cursor-target" onClick={handleVerify} disabled={isDisabled} style={isDisabled ? { cursor: 'not-allowed', filter: 'brightness(0.7)' } : {}}>VERIFY SEQUENCE</button>
         </div>
     );
 };
 
 
+// --- Main Decryption Interface Component (with all fixes) ---
 const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
     const [feedback, setFeedback] = useState("");
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
+    const [isLockedOut, setIsLockedOut] = useState(false);
+    const [wrongAttempts, setWrongAttempts] = useState(0);
+    const lockoutTimerRef = useRef(null);
+    const feedbackTimeoutRef = useRef(null);
 
+    // Cleanup timers on unmount
     useEffect(() => {
+        return () => {
+            if (lockoutTimerRef.current) clearTimeout(lockoutTimerRef.current);
+            if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+        };
+    }, []);
+
+     // Reset state when the puzzle prop changes
+     useEffect(() => {
         setFeedback("");
         setIsUnlocking(false);
         setIsShaking(false);
+        setIsLockedOut(false);
+        setWrongAttempts(0);
+        if (lockoutTimerRef.current) {
+             clearTimeout(lockoutTimerRef.current);
+             lockoutTimerRef.current = null;
+        }
+        if (feedbackTimeoutRef.current) {
+            clearTimeout(feedbackTimeoutRef.current);
+            feedbackTimeoutRef.current = null;
+        }
     }, [puzzle]);
 
+    // === FIX: Corrected 3-Strike Penalty Logic ===
+    const handleSolve = (isCorrectGuess) => {
+        if (isUnlocking || isLockedOut) return;
 
-    const handleSolve = (isCorrect) => {
-        if (isCorrect) {
+        if (feedbackTimeoutRef.current) {
+            clearTimeout(feedbackTimeoutRef.current);
+            feedbackTimeoutRef.current = null;
+        }
+
+        if (isCorrectGuess) {
+            if (lockoutTimerRef.current) {
+                clearTimeout(lockoutTimerRef.current);
+                lockoutTimerRef.current = null;
+            }
+            setWrongAttempts(0); // Reset on success
             setFeedback("// DECRYPTION SUCCESSFUL... ACCESSING NEXT FRAGMENT. //");
             setIsUnlocking(true);
-            setTimeout(() => {
-                onSuccess();
-             }, 2500); 
+            setTimeout(() => { onSuccess(); }, 2500);
         } else {
-            setFeedback("// ACCESS DENIED - INCORRECT KEY //");
+            const newAttemptCount = wrongAttempts + 1;
+            setWrongAttempts(newAttemptCount);
             setIsShaking(true);
-            setTimeout(() => { setFeedback(""); setIsShaking(false); }, 1000);
+
+            if (newAttemptCount >= 3) {
+                // Lockout on 3rd attempt, with updated message
+                setFeedback("// SYSTEM LOCKOUT (10 SECONDS) // Sloppy work, Agent. Analyze the intel carefully.");
+                setIsLockedOut(true);
+
+                if (lockoutTimerRef.current) { clearTimeout(lockoutTimerRef.current); }
+
+                lockoutTimerRef.current = setTimeout(() => {
+                    setFeedback("");
+                    setIsShaking(false);
+                    setIsLockedOut(false);
+                    setWrongAttempts(0); // Reset after lockout
+                    lockoutTimerRef.current = null;
+                }, 10000);
+            } else {
+                // Show standard error for attempts 1 and 2
+                setFeedback(`// ACCESS DENIED - INCORRECT KEY (${newAttemptCount}/3 attempts) //`);
+                feedbackTimeoutRef.current = setTimeout(() => {
+                    setFeedback("");
+                    feedbackTimeoutRef.current = null;
+                }, 1500);
+                 setTimeout(() => {
+                     setIsShaking(false);
+                }, 500);
+            }
         }
     };
 
     if (!puzzle) return null;
 
     const renderPuzzle = () => {
-        const puzzleType = puzzle.type || 'text'; 
+        const puzzleType = puzzle.type || 'text';
         switch (puzzleType) {
-            case 'redaction': return <RedactionPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} />;
-            case 'keyword': return <KeywordPuzzle puzzle={puzzle} onSolve={handleSolve} />;
-            case 'social-graph': return <SocialGraphPuzzle puzzle={puzzle} onSolve={handleSolve} />;
-            case 'personality-profile': return <PersonalityProfilePuzzle puzzle={puzzle} onSolve={handleSolve} />;
-            case 'timeline-anomaly': return <TimelinePuzzle puzzle={puzzle} onSolve={handleSolve} />;
-            // TextPuzzle now handles both standard and visual text
+            case 'redaction': return <RedactionPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} isDisabled={isLockedOut} />;
+            case 'keyword': return <KeywordPuzzle puzzle={puzzle} onSolve={handleSolve} isDisabled={isLockedOut} />;
+            case 'social-graph': return <SocialGraphPuzzle puzzle={puzzle} onSolve={handleSolve} isDisabled={isLockedOut} />;
+            case 'personality-profile': return <PersonalityProfilePuzzle puzzle={puzzle} onSolve={handleSolve} isDisabled={isLockedOut} />;
+            case 'timeline-anomaly': return <TimelinePuzzle puzzle={puzzle} onSolve={handleSolve} isDisabled={isLockedOut} />;
             case 'text':
-            default: return <TextPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} />;
+            default: return <TextPuzzle puzzle={puzzle} onSolve={handleSolve} shouldFocus={shouldFocus} isDisabled={isLockedOut} />;
         }
     };
 
+    const hasError = isLockedOut || wrongAttempts > 0;
+
     return (
-        <div id="decryption-terminal" className={`cursor-target ${isShaking ? "shake" : ""} ${isUnlocking ? "unlocking" : ""}`}>
+        <div id="decryption-terminal" className={`cursor-target ${isShaking ? "shake" : ""} ${isUnlocking ? "unlocking" : ""} ${isLockedOut ? "locked-out" : ""}`}>
             <div className="terminal-header">[ DECRYPTION CHALLENGE INITIATED ]</div>
             <div className="puzzle-content-area">
                 {!isUnlocking ? renderPuzzle() : null}
             </div>
-            <p id="decryption-feedback" className={isUnlocking ? "success" : ""}>
-                {feedback}
+            {/* Final corrected className logic */}
+            <p id="decryption-feedback" className={`${isUnlocking ? "success" : ""} ${hasError ? "error" : ""}`}>
+                 {feedback}
             </p>
         </div>
     );
 };
 
 export default DecryptionInterface;
+

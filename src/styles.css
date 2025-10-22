@@ -526,7 +526,7 @@ body::after {
 .timeline li::before {
   content: "";
   position: absolute;
-  left: -25px;
+  left: -30px;
   top: 8px;
   width: 10px;
   height: 10px;
@@ -1723,4 +1723,44 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
     font-size: 1.2rem;
     color: #555; /* Dim the noise */
     word-wrap: break-word;
+}
+.case-folder:hover .folder-front,
+.case-folder.preview .folder-front {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.case-folder:hover .folder-paper,
+.case-folder.preview .folder-paper {
+  transform: translateY(0);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* --- FIX: Hide Custom Cursor & Add Tap Cue on Touch Devices --- */
+@media (hover: none) and (pointer: coarse) {
+  /* Hide the custom cursor */
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+  /* Restore default cursors */
+  body, input, button, a {
+     cursor: auto !important;
+  }
+   #console-input,
+   #access-code-input,
+   #decryption-code-input {
+     cursor: text !important;
+   }
+   .console-container,
+   #access-terminal,
+   #decryption-terminal {
+     cursor: text !important;
+   }
+
+   /* Optional: Add a slight visual cue on touch tap for folders */
+   .case-folder:active {
+     transform: scale(0.98);
+     transition: transform 0.1s ease-out;
+  }
 }
