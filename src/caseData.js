@@ -46,10 +46,9 @@ export const caseData = {
 
     episodes: [
       {
-        title: "PART 1 — THE MIRAGE OF PROTECTION",
+        title: "EPISODE 1 — THE MIRAGE OF PROTECTION",
         type: "audio-debrief",
         audioSrc: "/assets/raven-ep1.mp3",
-        // CLUE IS NEARBY
         content: (
           <p>This debriefing details how Project Raven recruited former U.S. intelligence operatives. On paper, they were hired by an American company, <strong>CyberPoint International</strong>, but their true offensive mission was revealed in a secret orientation called the{" "}<strong>Black Meeting</strong>.</p>
         ),
@@ -61,10 +60,9 @@ export const caseData = {
         },
       },
       {
-        title: "PART 2 — INSIDE THE VILLA",
+        title: "EPISODE 2 — INSIDE THE VILLA",
         type: "audio-debrief",
         audioSrc: "/assets/raven-ep2.mp3",
-        // CLUE IS NEARBY
         content: (
           <p>The operation was run from a mansion in Abu Dhabi known as 'The Villa.' The team acquired a powerful 'zero-click' exploit that could break into iPhones without any user interaction. This tool was codenamed <strong>KARMA</strong>.</p>
         ),
@@ -75,10 +73,9 @@ export const caseData = {
         },
       },
       {
-        title: "PART 3 — THE TURN",
+        title: "EPISODE 3 — THE TURN",
         type: "audio-debrief",
         audioSrc: "/assets/raven-ep3.mp3",
-        // CLUE IS NEARBY
         content: (
           <p>The mission's focus shifted from counter-terrorism to political espionage. The entire operation was exposed to the public in a massive investigation published by the news agency{" "}<strong>REUTERS</strong> in January 2019.</p>
         ),
@@ -90,7 +87,7 @@ export const caseData = {
         },
       },
       {
-        title: "PART 4 — AFTERMATH & LEGACY",
+        title: "EPISODE 4 — AFTERMATH & LEGACY",
         type: "audio-debrief",
         audioSrc: "/assets/raven-ep4.mp3",
         content: (
@@ -117,10 +114,9 @@ export const caseData = {
 
     intro: {
       type: "audio",
-      audioSrc: null,
+      audioSrc: "/assets/ca-intro.mp3",
       content: ( <p>"This file is about a ghost in the machine... This is the story of Cambridge Analytica."</p> ),
     },
-    // CLUE FOR FIRST PUZZLE IS HERE
     overview: (
       <>
         <p>The Cambridge Analytica scandal exposed how a political consulting firm harvested personal data from 87 million Facebook users without consent, using psychological profiling techniques to manipulate voter behavior during the 2016 U.S. presidential election and Brexit referendum. The case revealed how social media platforms could be weaponized to influence democratic processes through targeted psychological manipulation and micro-advertising.</p>
@@ -128,7 +124,6 @@ export const caseData = {
       </>
 
     ),
-    // CLUES FOR EPISODE PUZZLES ARE IN HERE
     timeline: (
       <ul>
         <li><strong>2013:</strong> Cambridge Analytica founded by Steve Bannon and Robert Mercer as American arm of British military contractor SCL Group.</li>
@@ -155,9 +150,9 @@ export const caseData = {
     },
     episodes: [
       {
-        title: "PART 1 — THE PSYCHOLOGY WEAPON",
+        title: "EPISODE 1 — THE PSYCHOLOGY WEAPON",
         type: "audio-debrief",
-        audioSrc: null,
+        audioSrc: "/assets/ca-ep1.mp3",
         content: ( <p>This debriefing explains the 'OCEAN model' of personality traits (Openness, Conscientiousness, Extroversion, Agreeableness, Neuroticism) that Cambridge Analytica used to build psychological profiles from Facebook likes. For example, people high in Neuroticism respond to messages of fear.</p> ),
         puzzle: {
           type: "personality-profile",
@@ -170,9 +165,9 @@ export const caseData = {
         },
       },
       {
-        title: "PART 2 — THE MANIPULATION MACHINE",
+        title: "EPISODE 2 — THE MANIPULATION MACHINE",
         type: "audio-debrief",
-        audioSrc: null,
+        audioSrc: "/assets/ca-ep2.mp3",
         content: ( <p>This episode details how the firm used psychographic profiles to target voters in the Trump and Brexit campaigns, quoting the CEO's boastful and unethical methods captured on undercover video.</p> ),
         puzzle: {
             type: "redaction",
@@ -182,9 +177,9 @@ export const caseData = {
         },
       },
       {
-        title: "PART 3 — THE WHISTLEBLOWER",
+        title: "EPISODE 3 — THE WHISTLEBLOWER",
         type: "audio-debrief",
-        audioSrc: null,
+        audioSrc: "/assets/ca-ep3.mp3",
         content: ( <p>This episode covers the timeline of the scandal breaking, from the initial whistleblower story to the CEO's exposé, the subsequent congressional testimony, and the company's eventual collapse.</p> ),
         puzzle: {
             type: "timeline-anomaly",
@@ -199,9 +194,9 @@ export const caseData = {
         },
       },
       {
-          title: "PART 4 — THE LEGACY OF MANIPULATION",
+          title: "EPISODE 4 — THE LEGACY OF MANIPULATION",
           type: "audio-debrief",
-          audioSrc: null,
+          audioSrc: "/assets/ca-ep4.mp3",
           content: ( <p>This final debriefing covers the aftermath, including the fines levied against Facebook and the new laws like GDPR that were created in response to the scandal.</p> ),
           puzzle: null, // Last episode, no puzzle
       }
@@ -213,7 +208,7 @@ export const caseData = {
   },
 
   // =================================================================================
-  // == CASE FILE: PANAMA PAPERS (Medium Difficulty - Final Puzzle Set)
+  // == CASE FILE: PANAMA PAPERS (Medium Difficulty )
   // =================================================================================
   "panama-papers": {
     title: "Panama Papers",
@@ -244,7 +239,7 @@ export const caseData = {
 
     ),
 
-    firstPuzzle: { // Puzzle 1 (Graph) - Unlocks Part 1 - REMAINS THE SAME
+    firstPuzzle: {
       type: "social-graph",
       prompt: "The 'Case Overview' explained how Mossack Fonseca used 'nominee directors' to hide a client's identity. Click the node that represents the FAKE owner used to sign the paperwork.",
       nodes: [
@@ -259,41 +254,36 @@ export const caseData = {
 
     episodes: [
       {
-        title: "PART 1 — THE SHADOW ECONOMY",
+        title: "EPISODE 1 — THE SHADOW ECONOMY",
         type: "audio-debrief",
         audioSrc: null,
         content: ( <p>This debriefing explains how Mossack Fonseca built its empire by specializing in offshore services like shell companies and nominee directors, effectively providing anonymity for its clients.</p> ),
-        // === CORRECTED PUZZLE 2 ("Leak Initiated" Theme - Redaction) ===
-        puzzle: { // Unlocks Part 2
+        puzzle: { 
           type: "redaction",
           documentText: "[INCOMING MESSAGE — UNKNOWN SOURCE]\nHello. This is [REDACTED]. Interested in data?\n> More than Cablegate...", // Themed text
           prompt: "A nameless signal reached Germany. The 'Key Events Timeline' identifies the codename of the one who started the largest leak in history. De-redact the transmission log.",
-          answer: "JOHN DOE" // Clue is in the Timeline (2015 entry)
+          answer: "JOHN DOE" 
         }
-        // ============================================================
       },
       {
-        title: "PART 2 — THE WHISTLEBLOWER",
+        title: "EPISODE 2 — THE WHISTLEBLOWER",
         type: "audio-debrief",
         audioSrc: null,
         content: ( <p>In 2015, 'John Doe' contacted Süddeutsche Zeitung. Facing 2.6TB of data, they partnered with the ICIJ, leading to a secret global investigation and the explosive publication in April 2016 that triggered immediate political fallout.</p> ),
-        // === CORRECTED PUZZLE 3 ("The Fallout" Theme - Descriptive Timeline) ===
-        puzzle: { // Unlocks Part 3
+        puzzle: { 
           type: "timeline-anomaly",
           prompt: "The leak triggered the firm's collapse over several years. Arrange the fallout in the correct chronological order using clues from the 'Key Events Timeline'.",
-          // Longer, descriptive events like Cambridge Analytica
           events: [
-            "Global investigations are launched by tax authorities after the ICIJ exposé.", // April 2016
-            "Mossack Fonseca announces the firm is shutting down due to reputational damage.", // March 2018
-            "Founders Jürgen Mossack and Ramón Fonseca are arrested on money laundering charges.", // ~2018/2019
-            "A Panamanian judge acquits the founders, citing insufficient evidence." // 2022
+            "Global investigations are launched by tax authorities after the ICIJ exposé.", 
+            "Mossack Fonseca announces the firm is shutting down due to reputational damage.", 
+            "Founders Jürgen Mossack and Ramón Fonseca are arrested on money laundering charges.", 
+            "A Panamanian judge acquits the founders, citing insufficient evidence." 
           ],
-          answer: "CORRECT_SEQUENCE" // User must order based on Timeline dates
+          answer: "CORRECT_SEQUENCE" 
         }
-        // =====================================================================
       },
       {
-        title: "PART 3 — THE RECKONING",
+        title: "EPISODE 3 — THE RECKONING",
         type: "audio-debrief",
         audioSrc: null,
         content: (

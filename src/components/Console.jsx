@@ -92,9 +92,10 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
       case "help":
         newLines.push(
           "  [AVAILABLE COMMANDS]",
+          "TYPE ANY OF THE COMMAND UNDER TO MOVE FORWARD ",
           "    HELP             - Displays this list of commands.",
           "    GOTO CASES       - Takes you to the cases section",
-          "    GGOTO ABOUT       - Takes you to the about section"
+          "    GOTO ABOUT       - Takes you to the about section"
         );
         break;
       case "clear":
