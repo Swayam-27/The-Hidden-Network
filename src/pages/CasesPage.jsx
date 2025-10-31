@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // <--- 1. Import useEffect
 import CaseFolder from '../components/CaseFolder.jsx';
 import { caseData } from '../caseData.js';
 
@@ -6,6 +6,20 @@ const allCases = Object.keys(caseData).map(key => ({ id: key, ...caseData[key] }
 
 const CasesPage = () => {
   const [filter, setFilter] = useState('all');
+
+  // === 2. NEW: State for completion status ===
+  const [completionStatus, setCompletionStatus] = useState({});
+
+  // On mount, read all completion statuses from localStorage
+  useEffect(() => {
+    const statuses = {};
+    allCases.forEach(caseInfo => {
+      const isCompleted = localStorage.getItem(`case_${caseInfo.id}_completed`) === 'true';
+      statuses[caseInfo.id] = isCompleted;
+    });
+    setCompletionStatus(statuses);
+  }, []); // Empty dependency array means this runs once on mount
+  // ==========================================
 
   return (
     <div className="page-container cases-page-container">
@@ -26,6 +40,7 @@ const CasesPage = () => {
             key={caseInfo.id} 
             {...caseInfo} 
             isVisible={filter === 'all' || filter === caseInfo.category}
+            isCompleted={completionStatus[caseInfo.id] || false}
           />
         ))}
       </main>

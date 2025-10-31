@@ -8,9 +8,11 @@ import React, {
 import Spline from "@splinetool/react-spline";
 import Console from "../components/Console.jsx";
 import Directive from "../components/Directive.jsx";
-
-// --- Preloader Component (with faster typing) ---
+// ***
+// *** Preloader component code is unchanged...
+// ***
 const Preloader = ({ onFinished }) => {
+  // ... (No changes to Preloader logic) ...
   const [lines, setLines] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   const lineIndex = useRef(0);
@@ -76,10 +78,12 @@ const Preloader = ({ onFinished }) => {
   );
 };
 
-// --- HomePage Component (UPDATED with the fix) ---
+
+// --- HomePage Component (UPDATED) ---
 const HomePage = ({ onLogin }) => {
   const [showPreloader, setShowPreloader] = useState(
-    () => !sessionStorage.getItem("preloaderShown")
+    // VVV PATCH 1: Using localStorage now VVV
+    () => !localStorage.getItem("preloaderShown")
   );
   const [activeFragment, setActiveFragment] = useState(0);
   const fragments = ["C", "I", "P", "H", "E", "R"];
@@ -121,12 +125,12 @@ const HomePage = ({ onLogin }) => {
   }, [showPreloader]);
 
   const handlePreloaderFinish = useCallback(() => {
-    sessionStorage.setItem("preloaderShown", "true");
+    // VVV PATCH 2: Using localStorage now VVV
+    localStorage.setItem("preloaderShown", "true");
     setShowPreloader(false);
   }, []);
 
-  // === NEW: Logic for Mobile Background ===
-  // This code runs in the component, bypassing the CSS build error.
+  // ... (rest of the component is unchanged) ...
   const isMobile = window.innerWidth <= 768;
   const heroStyle = isMobile ? {
     backgroundImage: `linear-gradient(rgba(5, 6, 8, 0.9), rgba(5, 6, 8, 0.9)), url(/assets/static-background.jpg)`,
@@ -134,7 +138,6 @@ const HomePage = ({ onLogin }) => {
     backgroundPosition: 'center center',
     backgroundRepeat: 'no-repeat',
   } : {};
-  // ======================================
 
   if (showPreloader) {
     return <Preloader onFinished={handlePreloaderFinish} />;
@@ -142,7 +145,6 @@ const HomePage = ({ onLogin }) => {
 
   return (
     <>
-      {/* Apply the inline style here */}
       <header className="hero" style={heroStyle}>
         <video autoPlay muted loop playsInline id="bg-video">
           <source src="/assets/background-video.mp4" />
@@ -156,7 +158,6 @@ const HomePage = ({ onLogin }) => {
           </Suspense>
         </div>
 
-        {/* This is the new PNG logo for mobile */}
         <img 
           src="/assets/logo-mobile.png" 
           alt="The Hidden Network" 
@@ -195,7 +196,7 @@ const HomePage = ({ onLogin }) => {
           onFinished={() => setDirectiveFinished(true)}
         />
         <Console
-          onLogin={onLogin}
+          onLogin={onLogin} 
           startTyping={directiveFinished}
         />
       </div>

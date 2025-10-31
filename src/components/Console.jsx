@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useAuth } from "../context/AuthContext"; // Import useAuth
 
-const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
+const Console = ({ startTyping }) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
   const [readyForInput, setReadyForInput] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(false);
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Get the login function and navigation from our context/router
+  const auth = useAuth();
+  const navigate = useNavigate();
 
   const handleContainerClick = () => {
     inputRef.current?.focus();
@@ -15,8 +21,11 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
   useEffect(() => {
     if (!startTyping) return;
     setShouldScroll(true);
+    
+    // --- PATCH 1: Use localStorage ---
     const welcomeShown =
-      sessionStorage.getItem("welcomeMessageShown") === "true";
+      localStorage.getItem("welcomeMessageShown") === "true";
+      
     if (welcomeShown) {
       setLines([""]);
       setReadyForInput(true);
@@ -36,7 +45,8 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
     const timeouts = [];
     const type = () => {
       if (lineIndex >= welcomeMessage.length) {
-        sessionStorage.setItem("welcomeMessageShown", "true");
+        // --- PATCH 2: Use localStorage ---
+        localStorage.setItem("welcomeMessageShown", "true");
         setReadyForInput(true);
         return;
       }
@@ -49,16 +59,14 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
           return newLines;
         });
         charIndex++;
-        // FASTER TYPING SPEED
-        timeouts.push(setTimeout(type, 10)); // Was: 20ms
+        timeouts.push(setTimeout(type, 10)); 
       } else {
         lineIndex++;
         charIndex = 0;
-        // FASTER DELAY BETWEEN LINES
-        timeouts.push(setTimeout(type, 25)); // Was: 50ms
+        timeouts.push(setTimeout(type, 25)); 
       }
     };
-    timeouts.push(setTimeout(type, 250)); // Shorter initial delay
+    timeouts.push(setTimeout(type, 250));
     return () => timeouts.forEach(clearTimeout);
   }, [startTyping]);
 
@@ -68,23 +76,33 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
     }
   }, [lines, shouldScroll]);
 
+  // --- PATCH 3: Simplified handleCommand ---
+  // No need for onLogin prop, we get auth and navigate directly.
   const handleCommand = (e) => {
     e.preventDefault();
     const command = input.toLowerCase().trim();
     const args = command.split(" ");
     const baseCommand = args[0];
     const newLines = [...lines, `C:\\Users\\Agent>${input}`];
+
+    const handleLogin = (path = '/cases') => {
+      if (auth && auth.login) {
+        auth.login(); // This sets isInsider = true
+      }
+      navigate(path); // This navigates to the new page
+    };
+
     switch (baseCommand) {
       case "goto":
         if (args[1] === "cases" || args[1] === "about") {
-          onLogin(`/${args[1]}`);
+          handleLogin(`/${args[1]}`); // Call our new function
         } else {
           newLines.push(`  '${input}' is not a valid GOTO command.`);
         }
         break;
       case "access":
         if (args[1]) {
-          onLogin(`/case/${args[1]}`);
+          handleLogin(`/case/${args[1]}`); // Call our new function
         } else {
           newLines.push("  ACCESS command requires a case-id.");
         }
@@ -93,9 +111,9 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
         newLines.push(
           "  [AVAILABLE COMMANDS]",
           "TYPE ANY OF THE COMMAND UNDER TO MOVE FORWARD ",
-          "    HELP             - Displays this list of commands.",
-          "    GOTO CASES       - Takes you to the cases section",
-          "    GOTO ABOUT       - Takes you to the about section"
+          "    HELP            - Displays this list of commands.",
+          "    GOTO CASES      - Takes you to the cases section",
+          "    GOTO ABOUT      - Takes you to the about section"
         );
         break;
       case "clear":
@@ -120,7 +138,8 @@ const Console = ({ onLogin, startTyping, fragmentAlert, onAlertHandled }) => {
 
   return (
     <div className="console-wrapper">
-      <div className="console-container" onClick={handleContainerClick}>
+      {/* --- PATCH 4: Added 'cursor-target' --- */}
+      <div className="console-container cursor-target" onClick={handleContainerClick}>
         <div className="console-header">
           <p>C:\\WINDOWS\\system32\\cmd.exe</p>
         </div>

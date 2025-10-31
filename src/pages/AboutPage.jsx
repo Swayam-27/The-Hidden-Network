@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext.jsx'; // <--- PATCH 1: Import useAuth
 
-// RevealedContent component (assuming it's defined correctly above or imported)
+// ... (RevealedContent component code is unchanged) ...
 const missionBriefingContent = [
     { type: 'h2', text: 'Our Purpose' },
     { type: 'p', text: "I am the sole custodian of this archive, known around here as The Cipher. I navigate the shadows of the digital world, turning confusion into clarity. This is not a collection of stories it is a collection of insight drawn from the chaos of information. The Hidden Network exists to reveal the truth behind the noise and show what is actually happening in the digital ether." },
@@ -45,20 +46,20 @@ const RevealedContent = ({ animate }) => {
         <div className="about-content">
             {animate
                 ? blocks.map((block, index) => {
-                      if (index > blockIndexRef.current) return null;
-                      const isCurrentBlock = index === blockIndexRef.current;
-                      const isTypingComplete = block.typedText.length === block.text.length;
-                      const showCursor = isCurrentBlock && !isTypingComplete;
+                    if (index > blockIndexRef.current) return null;
+                    const isCurrentBlock = index === blockIndexRef.current;
+                    const isTypingComplete = block.typedText.length === block.text.length;
+                    const showCursor = isCurrentBlock && !isTypingComplete;
 
-                      if (block.type === 'h2') {
-                          return <h2 key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</h2>;
-                      }
-                      return <p key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</p>;
+                    if (block.type === 'h2') {
+                        return <h2 key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</h2>;
+                    }
+                    return <p key={index}>{block.typedText}{showCursor && <span className="typing-cursor">_</span>}</p>;
                   })
                 : missionBriefingContent.map((block, index) => (
-                      block.type === 'h2'
-                          ? <h2 key={index}>{block.text}</h2>
-                          : <p key={index}>{block.text}</p>
+                    block.type === 'h2'
+                        ? <h2 key={index}>{block.text}</h2>
+                        : <p key={index}>{block.text}</p>
                   ))
             }
         </div>
@@ -66,9 +67,13 @@ const RevealedContent = ({ animate }) => {
 };
 
 
-// --- AboutPage Component (UPDATED with isMobile check) ---
+// --- AboutPage Component (UPDATED) ---
 const AboutPage = () => {
-  const [step, setStep] = useState(sessionStorage.getItem('accessGranted') ? 'revealed' : 'authenticating');
+  // VVV PATCH 2: Get state and functions from AuthContext VVV
+  const { accessGranted, grantAccess } = useAuth();
+
+  // VVV PATCH 3: Initialize state from context variable VVV
+  const [step, setStep] = useState(accessGranted ? 'revealed' : 'authenticating');
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState('');
   const [isShaking, setIsShaking] = useState(false);
@@ -89,7 +94,8 @@ const AboutPage = () => {
     if (inputValue.toUpperCase() === 'CIPHER') {
       setStep('success');
       setShouldAnimate(true);
-      sessionStorage.setItem('accessGranted', 'true');
+      // VVV PATCH 4: Call grantAccess() from context VVV
+      grantAccess(); 
     } else {
       setFeedback('// ACCESS DENIED //');
       setIsShaking(true);

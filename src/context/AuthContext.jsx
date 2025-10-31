@@ -5,20 +5,30 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [isInsider, setIsInsider] = useState(false);
+    const [isInsider, setIsInsider] = useState(() => {
+        return localStorage.getItem('isInsider') === 'true';
+    });
 
-    useEffect(() => {
-        if (sessionStorage.getItem('isInsider') === 'true') {
-            setIsInsider(true);
-        }
-    }, []);
+    const [accessGranted, setAccessGranted] = useState(() => {
+
+        return localStorage.getItem('accessGranted') === 'true';
+    });
 
     const login = () => {
-        sessionStorage.setItem('isInsider', 'true');
+        localStorage.setItem('isInsider', 'true');
         setIsInsider(true);
     };
 
-    const value = { isInsider, login };
+    const grantAccess = () => {
+        localStorage.setItem('accessGranted', 'true');
+        setAccessGranted(true);
+    };
+    const value = { 
+        isInsider, 
+        login, 
+        accessGranted, 
+        grantAccess 
+    };
 
     return (
         <AuthContext.Provider value={value}>

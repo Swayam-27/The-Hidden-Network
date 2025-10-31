@@ -3,8 +3,8 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- Puzzle Sub-Components (with isDisabled prop and fixes) ---
-
+// --- Puzzle Sub-Components (Unchanged) ---
+// ... (TextPuzzle, RedactionPuzzle, KeywordPuzzle, etc. are all unchanged) ...
 const TextPuzzle = ({ puzzle, onSolve, shouldFocus, isDisabled }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -127,13 +127,12 @@ const PersonalityProfilePuzzle = ({ puzzle, onSolve, isDisabled }) => {
     );
 };
 
-// === FIX: Correctly renders the text inside the div ===
 const SortableItem = ({ id }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        touchAction: 'none' // Helps with drag interaction on touch devices
+        touchAction: 'none'
     };
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="timeline-card cursor-target">
@@ -149,10 +148,7 @@ const TimelinePuzzle = ({ puzzle, onSolve, isDisabled }) => {
         setItems(Array.isArray(puzzle.events) ? [...puzzle.events].sort(() => Math.random() - 0.5) : []);
     }, [puzzle.events]);
 
-    // === FIX: Simplified PointerSensor initialization ===
-    // Remove activationConstraint to make dragging start immediately
     const sensors = useSensors(useSensor(PointerSensor));
-    // ===================================================
 
     const handleDragEnd = (event) => {
         if (isDisabled) return;
@@ -161,11 +157,10 @@ const TimelinePuzzle = ({ puzzle, onSolve, isDisabled }) => {
             setItems((currentItems) => {
                 const oldIndex = currentItems.indexOf(active.id);
                 const newIndex = currentItems.indexOf(over.id);
-                // Ensure indices are valid before moving
                 if (oldIndex !== -1 && newIndex !== -1) {
                     return arrayMove(currentItems, oldIndex, newIndex);
                 }
-                return currentItems; // Return unchanged if indices are invalid
+                return currentItems;
             });
         }
     };
@@ -190,8 +185,9 @@ const TimelinePuzzle = ({ puzzle, onSolve, isDisabled }) => {
 };
 
 
-// --- Main Decryption Interface Component (with all fixes) ---
-const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
+// --- Main Decryption Interface Component (UPDATED) ---
+// --- 1. Accept onWrongAttempt prop ---
+const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt }) => {
     const [feedback, setFeedback] = useState("");
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
@@ -225,7 +221,7 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
         }
     }, [puzzle]);
 
-    // === FIX: Corrected 3-Strike Penalty Logic ===
+    // --- 2. UPDATED 3-Strike Penalty Logic ---
     const handleSolve = (isCorrectGuess) => {
         if (isUnlocking || isLockedOut) return;
 
@@ -244,12 +240,19 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
             setIsUnlocking(true);
             setTimeout(() => { onSuccess(); }, 2500);
         } else {
+            // --- 3. CALL PARENT HANDLER ON WRONG ATTEMPT ---
+            // This tells CaseDetailPage to increment the *total* attempt counter
+            if (onWrongAttempt) {
+                onWrongAttempt();
+            }
+            // -----------------------------------------------
+
             const newAttemptCount = wrongAttempts + 1;
             setWrongAttempts(newAttemptCount);
             setIsShaking(true);
 
             if (newAttemptCount >= 3) {
-                // Lockout on 3rd attempt, with updated message
+                // Lockout on 3rd attempt (This is your existing logic)
                 setFeedback("// SYSTEM LOCKOUT (10 SECONDS) // Sloppy work, Agent. Analyze the intel carefully.");
                 setIsLockedOut(true);
 
@@ -261,7 +264,7 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
                     setIsLockedOut(false);
                     setWrongAttempts(0); // Reset after lockout
                     lockoutTimerRef.current = null;
-                }, 10000);
+                }, 10000); // 10-second lockout
             } else {
                 // Show standard error for attempts 1 and 2
                 setFeedback(`// ACCESS DENIED - INCORRECT KEY (${newAttemptCount}/3 attempts) //`);
@@ -271,7 +274,7 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
                 }, 1500);
                  setTimeout(() => {
                      setIsShaking(false);
-                }, 500);
+                 }, 500);
             }
         }
     };
@@ -299,7 +302,6 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
             <div className="puzzle-content-area">
                 {!isUnlocking ? renderPuzzle() : null}
             </div>
-            {/* Final corrected className logic */}
             <p id="decryption-feedback" className={`${isUnlocking ? "success" : ""} ${hasError ? "error" : ""}`}>
                  {feedback}
             </p>
@@ -308,4 +310,3 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus }) => {
 };
 
 export default DecryptionInterface;
-

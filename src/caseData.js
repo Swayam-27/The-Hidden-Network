@@ -297,4 +297,45 @@ export const caseData = {
       content: "The paper trail has been followed to its end. The Panama Papers file is now fully accessible. Your work here is done."
     }
   },
+  // =================================================================================
+  // == NEW CASE FILE: STUXNET (Coming Soon)
+  // =================================================================================
+  "stuxnet": {
+    title: "Stuxnet",
+    description: "The world's first digital weapon.",
+    category: "cyber-warfare",
+    meta: "Status: // FILE IN PREPARATION //",
+    imgSrc: "/assets/stux.jpg", // Make sure you have this image
+
+    intro: {
+      type: "audio",
+      audioSrc: null, 
+      content: null
+    },
+
+    overview: (
+      <>
+        <p>The Stuxnet case represents the world's first known act of cyberwarfare—a digital weapon designed by the United States and Israel to sabotage Iran's nuclear enrichment program. The operation, codenamed "Olympic Games," involved deploying a highly sophisticated computer worm that physically destroyed approximately 1,000 uranium enrichment centrifuges at Iran's Natanz nuclear facility between 2009 and 2010.</p>
+        <p>Unlike traditional malware, Stuxnet was engineered to cross <strong>air-gapped networks</strong> (systems physically isolated from the internet) via infected USB drives and specifically target <strong>Siemens Step 7 software</strong> controlling industrial systems. The worm exploited four zero-day vulnerabilities, manipulated centrifuge speeds to cause physical damage, and simultaneously fed false "normal" data to monitoring systems—making Iranian engineers believe everything was functioning properly while their equipment self-destructed.</p>
+        <p>The weapon's accidental global spread in 2010 led to its discovery by Belarusian security researchers, eventually exposing the classified operation and opening Pandora's box: the source code became publicly available, spawning a new generation of state-sponsored cyber weapons and fundamentally changing the nature of modern warfare.</p>
+      </>
+
+    ),
+    timeline: (
+      <ul>
+        <li><strong>2005-2006:</strong> President Bush authorizes NSA and Israeli Unit 8200 to develop Operation Olympic Games as a "third option" between diplomacy and military strikes against Iran's nuclear program.</li>
+        <li><strong>2007-2009:</strong> Stuxnet development and testing phase; U.S. Department of Energy builds secret replica of Natanz facility; weapon designed to spread via USB drives and target Siemens industrial control systems.</li>
+        <li><strong>Late 2009-Early 2010:</strong> Stuxnet successfully infiltrates Natanz facility; manipulates IR-1 centrifuge speeds (increasing to 1,410 Hz, then decreasing dramatically), destroying approximately 1,000 centrifuges while sending fake "normal" readings to operators.</li>
+        <li><strong>Mid-2010:</strong> Programming error causes Stuxnet to spread beyond Natanz onto the global internet; worm begins infecting computers worldwide but remains dormant on non-target systems.</li>
+        <li><strong>June 17, 2010:</strong> Sergey Ulasen, researcher at Belarus-based VirusBlokAda, discovers the worm after Iranian clients report system crashes; analysis reveals unprecedented use of four zero-day exploits and stolen digital certificates.</li>
+        <li><strong>November 2010:</strong> Iranian President Ahmadinejad publicly acknowledges "problems" with nuclear program; Iran temporarily suspends enrichment activities at Natanz.</li>
+        <li><strong>June 1, 2012:</strong> New York Times journalist David Sanger publishes exposé confirming U.S.-Israeli authorship of Stuxnet and details of Operation Olympic Games; Obama administration neither confirms nor denies.</li>
+        <li><strong>2013-Present:</strong> Edward Snowden validates U.S.-Israel cooperation; Stuxnet code becomes publicly downloadable, spawning successor malware (Duqu, Flame, Havex, Industroyer); establishes cyberspace as legitimate domain of warfare.</li>
+      </ul>
+
+    ),
+    firstPuzzle: null,
+    episodes: [],
+    conclusion: null
+  }
 };
