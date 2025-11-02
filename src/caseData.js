@@ -1,15 +1,15 @@
 import React from "react";
 
 export const caseData = {
-  // =================================================================================
-  // == CASE FILE: PROJECT RAVEN (Simple "Training" Case)
-  // =================================================================================
+  // == CASE FILE: PROJECT RAVEN
   "project-raven": {
     title: "Project Raven",
     description: "Inside the UAE’s secret hacking program.",
     category: "cyber-warfare",
     meta: "Year: 2009-2019",
     imgSrc: "/assets/project-raven.png",
+    
+    totalAudioDurationMs: 814000,
 
     intro: {
       type: "audio",
@@ -24,7 +24,6 @@ export const caseData = {
           surveil, and compromise devices.
         </p>
       </>
-
     ),
     timeline: (
       <ul>
@@ -35,7 +34,6 @@ export const caseData = {
         <li><strong>2019 January:</strong> Reuters publishes explosive investigation exposing Project Raven; Ex-NSA operatives given choice to leave; Villa cleared out, operation officially terminated.</li>
         <li><strong>2021 September:</strong> DOJ charges Marc Baier, Ryan Adams, and Daniel Gericke; $1.685 million in fines, lifetime security clearance bans; operations transferred to Digital14.</li>
       </ul>
-
     ),
 
     firstPuzzle: {
@@ -93,7 +91,7 @@ export const caseData = {
         content: (
           <p>After being exposed, Project Raven was absorbed into a UAE-based company called <strong>DarkMatter</strong>. In 2021, three American managers were charged by the U.S. Department of Justice, setting a precedent for the 'hacking-for-hire' industry.</p>
         ),
-        puzzle: null, // Last episode, no puzzle
+        puzzle: null, 
       },
     ],
     conclusion: {
@@ -102,15 +100,15 @@ export const caseData = {
     }
   },
 
-  // =================================================================================
-  // == CASE FILE: CAMBRIDGE ANALYTICA (Medium Difficulty)
-  // =================================================================================
+  // == CASE FILE: CAMBRIDGE ANALYTICA
   "cambridge-analytica": {
     title: "Cambridge Analytica",
     description: "Data, democracy, and manipulation.",
     category: "data-privacy",
     meta: "Year: 2014-2018 // Status: Defunct",
     imgSrc: "/assets/ca.png",
+
+    totalAudioDurationMs: 1940000, 
 
     intro: {
       type: "audio",
@@ -122,7 +120,6 @@ export const caseData = {
         <p>The Cambridge Analytica scandal exposed how a political consulting firm harvested personal data from 87 million Facebook users without consent, using psychological profiling techniques to manipulate voter behavior during the 2016 U.S. presidential election and Brexit referendum. The case revealed how social media platforms could be weaponized to influence democratic processes through targeted psychological manipulation and micro-advertising.</p>
         <p>The data was harvested by an academic, <strong>Aleksandr Kogan</strong>, through a seemingly harmless quiz app.</p>
       </>
-
     ),
     timeline: (
       <ul>
@@ -133,7 +130,6 @@ export const caseData = {
         <li><strong>2018 April:</strong> Mark Zuckerberg testifies before Congress about data breach; admits Facebook failed to protect users.</li>
         <li><strong>2018 May:</strong> Cambridge Analytica declares bankruptcy and shuts down operations; Alexander Nix banned from running UK companies; Facebook faces $5 billion FTC fine.</li>
       </ul>
-
     ),
 
     firstPuzzle: {
@@ -207,15 +203,16 @@ export const caseData = {
     }
   },
 
-  // =================================================================================
-  // == CASE FILE: PANAMA PAPERS (Medium Difficulty )
-  // =================================================================================
+  // == CASE FILE: PANAMA PAPERS
   "panama-papers": {
     title: "Panama Papers",
     description: "The world’s largest financial leak.",
     category: "financial-crime",
     meta: "Year: 2016 // Status: Public",
     imgSrc: "/assets/panama-papers.png",
+
+    totalAudioDurationMs: 0, 
+
     intro: {
       type: "audio",
       audioSrc: null,
@@ -236,7 +233,6 @@ export const caseData = {
         <li><strong>2017 October:</strong> Maltese journalist Daphne Caruana Galizia assassinated by car bomb after investigating Panama Papers connections to Malta's government.</li>
         <li><strong>2018 March:</strong> Mossack Fonseca announces closure due to "economic and reputational damage"; founders arrested but later acquitted in 2022; global tax reforms implemented worldwide.</li>
       </ul>
-
     ),
 
     firstPuzzle: {
@@ -260,7 +256,7 @@ export const caseData = {
         content: ( <p>This debriefing explains how Mossack Fonseca built its empire by specializing in offshore services like shell companies and nominee directors, effectively providing anonymity for its clients.</p> ),
         puzzle: { 
           type: "redaction",
-          documentText: "[INCOMING MESSAGE — UNKNOWN SOURCE]\nHello. This is [REDACTED]. Interested in data?\n> More than Cablegate...", // Themed text
+          documentText: "[INCOMING MESSAGE — UNKNOWN SOURCE]\nHello. This is [REDACTED]. Interested in data?\n> More than Cablegate...",
           prompt: "A nameless signal reached Germany. The 'Key Events Timeline' identifies the codename of the one who started the largest leak in history. De-redact the transmission log.",
           answer: "JOHN DOE" 
         }
@@ -297,29 +293,28 @@ export const caseData = {
       content: "The paper trail has been followed to its end. The Panama Papers file is now fully accessible. Your work here is done."
     }
   },
-  // =================================================================================
-  // == NEW CASE FILE: STUXNET (Coming Soon)
-  // =================================================================================
+  // CASE FILE: STUXNET
+
   "stuxnet": {
     title: "Stuxnet",
     description: "The world's first digital weapon.",
     category: "cyber-warfare",
     meta: "Status: // FILE IN PREPARATION //",
-    imgSrc: "/assets/stux.jpg", // Make sure you have this image
+    imgSrc: "/assets/stux.jpg",
+
+    totalAudioDurationMs: 0, 
 
     intro: {
       type: "audio",
       audioSrc: null, 
       content: null
     },
-
     overview: (
-      <>
-        <p>The Stuxnet case represents the world's first known act of cyberwarfare—a digital weapon designed by the United States and Israel to sabotage Iran's nuclear enrichment program. The operation, codenamed "Olympic Games," involved deploying a highly sophisticated computer worm that physically destroyed approximately 1,000 uranium enrichment centrifuges at Iran's Natanz nuclear facility between 2009 and 2010.</p>
-        <p>Unlike traditional malware, Stuxnet was engineered to cross <strong>air-gapped networks</strong> (systems physically isolated from the internet) via infected USB drives and specifically target <strong>Siemens Step 7 software</strong> controlling industrial systems. The worm exploited four zero-day vulnerabilities, manipulated centrifuge speeds to cause physical damage, and simultaneously fed false "normal" data to monitoring systems—making Iranian engineers believe everything was functioning properly while their equipment self-destructed.</p>
-        <p>The weapon's accidental global spread in 2010 led to its discovery by Belarusian security researchers, eventually exposing the classified operation and opening Pandora's box: the source code became publicly available, spawning a new generation of state-sponsored cyber weapons and fundamentally changing the nature of modern warfare.</p>
-      </>
-
+       <>
+         <p>The Stuxnet case represents the world's first known act of cyberwarfare—a digital weapon designed by the United States and Israel to sabotage Iran's nuclear enrichment program. The operation, codenamed "Olympic Games," involved deploying a highly sophisticated computer worm that physically destroyed approximately 1,000 uranium enrichment centrifuges at Iran's Natanz nuclear facility between 2009 and 2010.</p>
+         <p>Unlike traditional malware, Stuxnet was engineered to cross <strong>air-gapped networks</strong> (systems physically isolated from the internet) via infected USB drives and specifically target <strong>Siemens Step 7 software</strong> controlling industrial systems. The worm exploited four zero-day vulnerabilities, manipulated centrifuge speeds to cause physical damage, and simultaneously fed false "normal" data to monitoring systems—making Iranian engineers believe everything was functioning properly while their equipment self-destructed.</p>
+         <p>The weapon's accidental global spread in 2010 led to its discovery by Belarusian security researchers, eventually exposing the classified operation and opening Pandora's box: the source code became publicly available, spawning a new generation of state-sponsored cyber weapons and fundamentally changing the nature of modern warfare.</p>
+       </>
     ),
     timeline: (
       <ul>
@@ -332,7 +327,6 @@ export const caseData = {
         <li><strong>June 1, 2012:</strong> New York Times journalist David Sanger publishes exposé confirming U.S.-Israeli authorship of Stuxnet and details of Operation Olympic Games; Obama administration neither confirms nor denies.</li>
         <li><strong>2013-Present:</strong> Edward Snowden validates U.S.-Israel cooperation; Stuxnet code becomes publicly downloadable, spawning successor malware (Duqu, Flame, Havex, Industroyer); establishes cyberspace as legitimate domain of warfare.</li>
       </ul>
-
     ),
     firstPuzzle: null,
     episodes: [],

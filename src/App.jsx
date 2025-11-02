@@ -1,7 +1,5 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
-// 1. --- PATCH: Import Navigate ---
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-// 2. --- PATCH: Removed .jsx extensions from imports ---
 import { useAuth } from './context/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -14,7 +12,6 @@ const HomePage = React.lazy(() => import('./pages/HomePage'));
 const CasesPage = React.lazy(() => import('./pages/CasesPage'));
 const CaseDetailPage = React.lazy(() => import('./pages/CaseDetailPage'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage'));
-// ---------------------------------------------------
 
 const AppState = {
   PRELOADING: 'PRELOADING',
@@ -24,12 +21,9 @@ const AppState = {
   NAVIGATING: 'NAVIGATING', 
 };
 
-// --- PATCH: Add ProtectedRoute component ---
-// This component protects your routes from non-insiders
 const ProtectedRoute = ({ children }) => {
   const { isInsider } = useAuth();
   if (!isInsider) {
-    // If not an insider, boot them to the homepage.
     return <Navigate to="/" replace />;
   }
   return children;
@@ -42,7 +36,6 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // --- PATCH: Use localStorage ---
     const preloaderShown = localStorage.getItem('preloaderShown') === 'true';
     if (!preloaderShown) {
       setAppState(AppState.PRELOADING);
@@ -54,13 +47,11 @@ export default function App() {
   }, [isInsider]);
 
   const handlePreloaderFinish = useCallback(() => {
-    // --- PATCH: Use localStorage ---
     localStorage.setItem('preloaderShown', 'true');
     setAppState(AppState.AUTHENTICATING);
   }, []);
 
   const handleLogin = useCallback((path) => {
-    // --- PATCH: Use localStorage ---
     const breachShown = localStorage.getItem('breachAnimationShown') === 'true';
 
     if (!breachShown) {
@@ -77,7 +68,6 @@ export default function App() {
   }, [isInsider, login, navigate]);
 
   const handleBreachComplete = useCallback(() => {
-    // --- PATCH: Use localStorage ---
     localStorage.setItem('breachAnimationShown', 'true');
     if (!isInsider) login();
     setAppState(AppState.INSIDER);
@@ -96,17 +86,14 @@ export default function App() {
     <>
       <TargetCursor targetSelector=".cursor-target" />
 
-      {/* This logic is correct */}
       {appState === AppState.INSIDER && <Navbar />}
       
       <main>
         {/* --- PATCH: Fixed typo 'SuspFense' --- */}
         <Suspense fallback={<Loader />}>
           <Routes>
-            {/* --- PATCH: Cleaned up props --- */}
             <Route path="/" element={<HomePage onLogin={handleLogin} onPreloaderFinish={handlePreloaderFinish} appState={appState} />} />
 
-            {/* --- PATCH: Wrap all routes in ProtectedRoute --- */}
             <Route 
               path="/cases" 
               element={
@@ -139,4 +126,3 @@ export default function App() {
     </>
   );
 }
-

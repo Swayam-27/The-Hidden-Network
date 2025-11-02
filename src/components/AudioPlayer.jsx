@@ -1,87 +1,103 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const formatTime = (time) => {
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60).toString().padStart(2, '0');
-  return `${minutes}:${seconds}`;
-};
+const ComingSoonPlaceholder = () => (
+ <div className="coming-soon-placeholder">
+   <p>// AUDIO DEBRIEFING PENDING //</p>
+   <p>COMING SOON</p>
+ </div>
+);
 
-const AudioPlayer = ({ src, caseTitle }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const audioRef = useRef(null);
-  const progressBarRef = useRef(null);
+const AudioPlayer = ({ src, caseTitle, episodeTitle }) => {
+ const [isPlaying, setIsPlaying] = useState(false);
+ const [duration, setDuration] = useState(0);
+ const [currentTime, setCurrentTime] = useState(0);
+ const audioRef = useRef(null);
+ const progressBarRef = useRef(null);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+ useEffect(() => {
+   const audio = audioRef.current;
+   if (!audio) return;
+   const setAudioData = () => {
+     setDuration(audio.duration);
+     setCurrentTime(audio.currentTime);
+   };
+   const setAudioTime = () => setCurrentTime(audio.currentTime);
+   audio.addEventListener('loadeddata', setAudioData);
+   audio.addEventListener('timeupdate', setAudioTime);
+   audio.addEventListener('ended', () => setIsPlaying(false));
+   return () => {
+     if (audio) {
+       audio.removeEventListener('loadeddata', setAudioData);
+       audio.removeEventListener('timeupdate', setAudioTime);
+       audio.removeEventListener('ended', () => setIsPlaying(false));
+     }
+   };
+ }, [src]);
 
-    const setAudioData = () => {
-      setDuration(audio.duration);
-      setCurrentTime(audio.currentTime);
-    }
+ const togglePlayPause = () => {
+   if (!src) return;
+   if (isPlaying) {
+     audioRef.current.pause();
+   } else {
+     audioRef.current.play();
+   }
+   setIsPlaying(!isPlaying);
+ };
 
-    const setAudioTime = () => setCurrentTime(audio.currentTime);
-
-    audio.addEventListener('loadeddata', setAudioData);
-    audio.addEventListener('timeupdate', setAudioTime);
-
-    return () => {
-      audio.removeEventListener('loadeddata', setAudioData);
-      audio.removeEventListener('timeupdate', setAudioTime);
-    }
-  }, []);
-
-  const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleProgressChange = (e) => {
+ const handleProgressChange = (e) => {
     const progressBar = progressBarRef.current;
-    const clickPosition = e.clientX - progressBar.getBoundingClientRect().left;
-    const newTime = (clickPosition / progressBar.offsetWidth) * duration;
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-  
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const newTime = (clickX / width) * duration;
 
-  if (!src) {
-    return <div className="media-embed"><p>[Audio Not Available]</p></div>;
-  }
+    if (isFinite(newTime)) {
+        audioRef.current.currentTime = newTime;
+        setCurrentTime(newTime);
+    }
+ };
 
-  return (
-    <div className="custom-audio-player">
-      <audio ref={audioRef} src={src} preload="metadata" />
-      
-      <div className="player-controls">
-        <button onClick={togglePlayPause} className="play-pause-btn">
-          {isPlaying ? (
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.016 5.016h3.984v13.969h-3.984v-13.969zM6 18.984v-13.969h3.984v13.969h-3.984z"></path></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.016 5.016l10.969 6.984-10.969 6.984v-13.969z"></path></svg>
-          )}
-        </button>
-        
-        <div className="player-info">
-          <p className="track-title">CIPHER // {caseTitle}: AUDIO BRIEFING</p>
-          <p className={`status-text ${isPlaying ? 'streaming' : ''}`}>STATUS: {isPlaying ? 'STREAMING...' : 'STANDBY'}</p>
-        </div>
-        
-        <div className="time-display">{formatTime(currentTime)} / {formatTime(duration)}</div>
-      </div>
+ const formatTime = (time) => {
+   if (isNaN(time) || time === 0) return "0:00";
+   const minutes = Math.floor(time / 60);
+   const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+   return `${minutes}:${seconds}`;
+ };
 
-      <div className="progress-bar-wrapper" ref={progressBarRef} onClick={handleProgressChange}>
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-      </div>
-    </div>
-  );
+ const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+ const trackDisplayTitle = episodeTitle ? episodeTitle.toUpperCase() : "AUDIO BRIEFING";
+
+ if (!src) {
+   return <ComingSoonPlaceholder />;
+ }
+
+ return (
+   <div className="custom-audio-player-wrapper cursor-target" onClick={togglePlayPause}>
+     <div className="custom-audio-player">
+       <audio ref={audioRef} src={src} preload="metadata" onEnded={() => setIsPlaying(false)} />
+       <div className="player-controls">
+         <button className="play-pause-btn" disabled={!src}>
+           {isPlaying ? (
+             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 19h4V5h-4v14zm-8 0h4V5H6v14z"></path></svg>
+           ) : (
+             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+           )}
+         </button>
+         <div className="player-info">
+           <p className="track-title">{caseTitle.toUpperCase()}: {trackDisplayTitle}</p>
+           <p className={`status-text ${isPlaying && src ? 'streaming' : ''}`}>STATUS: {isPlaying ? 'STREAMING...' : 'STANDBY'}</p>
+         </div>
+         <div className="time-display">{formatTime(currentTime)} / {formatTime(duration)}</div>
+       </div>
+       <div className="progress-bar-wrapper" ref={progressBarRef} onClick={(e) => {
+         e.stopPropagation();
+         if (src) handleProgressChange(e);
+       }}>
+         <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+       </div>
+     </div>
+   </div>
+ );
 };
 
-export default AudioPlayer;
+export default React.memo(AudioPlayer);

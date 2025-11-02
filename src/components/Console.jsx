@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { useAuth } from "../context/AuthContext"; // Import useAuth
+// --- PATCH 1: Remove imports that bypass the prop system ---
+// import { useNavigate } from "react-router-dom"; 
+// import { useAuth } from "../context/AuthContext";
 
-const Console = ({ startTyping }) => {
+// --- PATCH 2: Accept onLogin as a prop again ---
+const Console = ({ onLogin, startTyping }) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
   const [readyForInput, setReadyForInput] = useState(false);
@@ -10,9 +12,9 @@ const Console = ({ startTyping }) => {
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Get the login function and navigation from our context/router
-  const auth = useAuth();
-  const navigate = useNavigate();
+  // --- PATCH 3: Remove the rogue auth/navigate logic ---
+  // const auth = useAuth();
+  // const navigate = useNavigate();
 
   const handleContainerClick = () => {
     inputRef.current?.focus();
@@ -22,7 +24,6 @@ const Console = ({ startTyping }) => {
     if (!startTyping) return;
     setShouldScroll(true);
     
-    // --- PATCH 1: Use localStorage ---
     const welcomeShown =
       localStorage.getItem("welcomeMessageShown") === "true";
       
@@ -38,14 +39,13 @@ const Console = ({ startTyping }) => {
       `[TIMESTAMP: ${timestamp.toISOString()}]`,
       "",
       "System online. Awaiting input.",
-      "Type [HELP] for a list of available commands.",
+      "Type HELP for a list of available commands.",
     ];
     let lineIndex = 0;
     let charIndex = 0;
     const timeouts = [];
     const type = () => {
       if (lineIndex >= welcomeMessage.length) {
-        // --- PATCH 2: Use localStorage ---
         localStorage.setItem("welcomeMessageShown", "true");
         setReadyForInput(true);
         return;
@@ -76,8 +76,7 @@ const Console = ({ startTyping }) => {
     }
   }, [lines, shouldScroll]);
 
-  // --- PATCH 3: Simplified handleCommand ---
-  // No need for onLogin prop, we get auth and navigate directly.
+  // --- PATCH 4: Use the onLogin prop from App.jsx ---
   const handleCommand = (e) => {
     e.preventDefault();
     const command = input.toLowerCase().trim();
@@ -85,24 +84,19 @@ const Console = ({ startTyping }) => {
     const baseCommand = args[0];
     const newLines = [...lines, `C:\\Users\\Agent>${input}`];
 
-    const handleLogin = (path = '/cases') => {
-      if (auth && auth.login) {
-        auth.login(); // This sets isInsider = true
-      }
-      navigate(path); // This navigates to the new page
-    };
+    // --- (Removed the internal handleLogin function) ---
 
     switch (baseCommand) {
       case "goto":
         if (args[1] === "cases" || args[1] === "about") {
-          handleLogin(`/${args[1]}`); // Call our new function
+          onLogin(`/${args[1]}`); // <-- This now correctly calls the prop
         } else {
           newLines.push(`  '${input}' is not a valid GOTO command.`);
         }
         break;
       case "access":
         if (args[1]) {
-          handleLogin(`/case/${args[1]}`); // Call our new function
+          onLogin(`/case/${args[1]}`); // <-- This now correctly calls the prop
         } else {
           newLines.push("  ACCESS command requires a case-id.");
         }
@@ -138,7 +132,7 @@ const Console = ({ startTyping }) => {
 
   return (
     <div className="console-wrapper">
-      {/* --- PATCH 4: Added 'cursor-target' --- */}
+      {/* This cursor fix is correct and remains */}
       <div className="console-container cursor-target" onClick={handleContainerClick}>
         <div className="console-header">
           <p>C:\\WINDOWS\\system32\\cmd.exe</p>

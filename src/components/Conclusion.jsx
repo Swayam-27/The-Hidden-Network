@@ -1,6 +1,5 @@
 import React from 'react';
 
-// --- 1. Helper function to format time (ms to MM:SS) ---
 const formatTimerDisplay = (timeInMs) => {
   if (timeInMs == null || !Number.isFinite(timeInMs) || timeInMs < 0) return "00:00";
   const totalSeconds = Math.floor(timeInMs / 1000);
@@ -9,45 +8,36 @@ const formatTimerDisplay = (timeInMs) => {
   return `${minutes}:${seconds}`;
 };
 
-// --- 2. Helper function to calculate rank ---
-const calculateRank = (totalTimeMs, totalAttempts, puzzleCount) => {
-  // Handle potential division by zero if puzzleCount is 0
+const calculateRank = (totalTimeMs, totalAttempts, puzzleCount, totalAudioDurationMs) => {
   if (puzzleCount === 0) {
     return { rank: 'A-CLASS', title: 'OPERATIONAL' };
   }
 
-  const avgTimePerPuzzle = totalTimeMs / puzzleCount;
+  const solveTimeMs = Math.max(0, totalTimeMs - totalAudioDurationMs);
+  const avgSolveTimeMs = solveTimeMs / puzzleCount;
 
-  // S-CLASS: Flawless (0 wrong attempts) and fast
-  if (totalAttempts === 0 && avgTimePerPuzzle < 45000) { // < 45s per puzzle
+  if (totalAttempts === 0 && avgSolveTimeMs < 90000) { 
     return { rank: 'S-CLASS', title: 'GHOST PROTOCOL' };
   }
 
-  // A-CLASS: Very few mistakes and good time
-  if (totalAttempts <= puzzleCount / 2 && avgTimePerPuzzle < 90000) { // < 1m 30s per puzzle
+  if (totalAttempts <= puzzleCount / 2 && avgSolveTimeMs < 180000) {
     return { rank: 'A-CLASS', title: 'FIELD AGENT' };
   }
   
-  // B-CLASS: Standard completion
-  if (totalAttempts <= puzzleCount || avgTimePerPuzzle < 180000) { // < 3m per puzzle
+  if (totalAttempts <= puzzleCount || avgSolveTimeMs < 300000) {
     return { rank: 'B-CLASS', title: 'ANALYST' };
   }
-
-  // C-CLASS: Sloppy or slow
+  
   return { rank: 'C-CLASS', title: 'RECRUIT' };
 };
 
-// --- 3. Update component to use new props ---
-const Conclusion = ({ message, totalTimeMs, totalAttempts, episodeCount }) => {
+const Conclusion = ({ message, totalTimeMs, totalAttempts, episodeCount, totalAudioDurationMs }) => {
   
-  // Get the calculated rank and title
-  const { rank, title } = calculateRank(totalTimeMs, totalAttempts, episodeCount);
+  const { rank, title } = calculateRank(totalTimeMs, totalAttempts, episodeCount, totalAudioDurationMs || 0);
 
   return (
     <div className="conclusion-wrapper">
       <div className="conclusion-header">[ TRANSMISSION COMPLETE ]</div>
-      
-      {/* --- 4. Dynamic Ranked Debriefing --- */}
       <div className="conclusion-rank-debrief">
         <h3 className="rank-title">CLASSIFIED: {title}</h3>
         <p className="rank-rating">Rating: {rank}</p>
@@ -62,4 +52,4 @@ const Conclusion = ({ message, totalTimeMs, totalAttempts, episodeCount }) => {
   );
 };
 
-export default Conclusion;
+export default React.memo(Conclusion);

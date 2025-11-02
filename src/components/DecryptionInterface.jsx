@@ -3,8 +3,6 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- Puzzle Sub-Components (Unchanged) ---
-// ... (TextPuzzle, RedactionPuzzle, KeywordPuzzle, etc. are all unchanged) ...
 const TextPuzzle = ({ puzzle, onSolve, shouldFocus, isDisabled }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -184,9 +182,6 @@ const TimelinePuzzle = ({ puzzle, onSolve, isDisabled }) => {
     );
 };
 
-
-// --- Main Decryption Interface Component (UPDATED) ---
-// --- 1. Accept onWrongAttempt prop ---
 const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt }) => {
     const [feedback, setFeedback] = useState("");
     const [isUnlocking, setIsUnlocking] = useState(false);
@@ -196,7 +191,6 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
     const lockoutTimerRef = useRef(null);
     const feedbackTimeoutRef = useRef(null);
 
-    // Cleanup timers on unmount
     useEffect(() => {
         return () => {
             if (lockoutTimerRef.current) clearTimeout(lockoutTimerRef.current);
@@ -204,7 +198,6 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
         };
     }, []);
 
-     // Reset state when the puzzle prop changes
      useEffect(() => {
         setFeedback("");
         setIsUnlocking(false);
@@ -221,7 +214,6 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
         }
     }, [puzzle]);
 
-    // --- 2. UPDATED 3-Strike Penalty Logic ---
     const handleSolve = (isCorrectGuess) => {
         if (isUnlocking || isLockedOut) return;
 
@@ -235,24 +227,20 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
                 clearTimeout(lockoutTimerRef.current);
                 lockoutTimerRef.current = null;
             }
-            setWrongAttempts(0); // Reset on success
+            setWrongAttempts(0);
             setFeedback("// DECRYPTION SUCCESSFUL... ACCESSING NEXT FRAGMENT. //");
             setIsUnlocking(true);
             setTimeout(() => { onSuccess(); }, 2500);
         } else {
-            // --- 3. CALL PARENT HANDLER ON WRONG ATTEMPT ---
-            // This tells CaseDetailPage to increment the *total* attempt counter
             if (onWrongAttempt) {
                 onWrongAttempt();
             }
-            // -----------------------------------------------
 
             const newAttemptCount = wrongAttempts + 1;
             setWrongAttempts(newAttemptCount);
             setIsShaking(true);
 
             if (newAttemptCount >= 3) {
-                // Lockout on 3rd attempt (This is your existing logic)
                 setFeedback("// SYSTEM LOCKOUT (10 SECONDS) // Sloppy work, Agent. Analyze the intel carefully.");
                 setIsLockedOut(true);
 
@@ -262,11 +250,10 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
                     setFeedback("");
                     setIsShaking(false);
                     setIsLockedOut(false);
-                    setWrongAttempts(0); // Reset after lockout
+                    setWrongAttempts(0);
                     lockoutTimerRef.current = null;
-                }, 10000); // 10-second lockout
+                }, 10000);
             } else {
-                // Show standard error for attempts 1 and 2
                 setFeedback(`// ACCESS DENIED - INCORRECT KEY (${newAttemptCount}/3 attempts) //`);
                 feedbackTimeoutRef.current = setTimeout(() => {
                     setFeedback("");
@@ -309,4 +296,4 @@ const DecryptionInterface = ({ puzzle, onSuccess, shouldFocus, onWrongAttempt })
     );
 };
 
-export default DecryptionInterface;
+export default React.memo(DecryptionInterface);
