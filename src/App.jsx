@@ -89,7 +89,6 @@ export default function App() {
       {appState === AppState.INSIDER && <Navbar />}
       
       <main>
-        {/* --- PATCH: Fixed typo 'SuspFense' --- */}
         <Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<HomePage onLogin={handleLogin} onPreloaderFinish={handlePreloaderFinish} appState={appState} />} />
@@ -119,7 +118,6 @@ export default function App() {
               } 
             />
           </Routes>
-        {/* --- PATCH: Fixed typo 'SuspFailurense' --- */}
         </Suspense>
       </main>
       <Footer />

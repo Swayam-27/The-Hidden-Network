@@ -1,7 +1,7 @@
 # Dependencies
 /node_modules
 
-# Build artifacts (Netlify will generate these)
+
 /build
 /dist
 /out

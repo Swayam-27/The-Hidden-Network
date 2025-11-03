@@ -679,7 +679,7 @@ body::after {
   text-align: justify;
 }
 
-/* --- MEDIA QUERIES --- */
+/* MOBILE OPTIMIZATIONS */
 @media (max-width: 768px) {
   #bg-video {
     display: none;
@@ -748,19 +748,19 @@ a[href*="spline.design"] {
   display: flex;
   justify-content: center;
   padding: 2rem 1rem;
-  background-color: var(--main-bg); /* Match the body background */
+  background-color: var(--main-bg); 
 }
 
 .console-container {
   width: 100%;
-  max-width: 800px; /* Control the max width of the console */
-  height: 350px; /* Give it a fixed height */
-  background-color: #010101; /* Classic black background */
+  max-width: 800px;
+  height: 350px; 
+  background-color: #010101; 
   border: 1px solid #555;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  font-family: "Consolas", "Courier New", monospace; /* Classic CMD font */
+  font-family: "Consolas", "Courier New", monospace;
 }
 
 .console-header {
@@ -776,7 +776,6 @@ a[href*="spline.design"] {
   margin: 0;
 }
 
-/* The main output area */
 .console-output {
   flex-grow: 1;
   overflow-y: auto;
@@ -800,12 +799,11 @@ a[href*="spline.design"] {
   font-size: 0.9rem;
 }
 .console-input-line input {
-  color: #c4c4c4; /* Input text color */
+  color: #c4c4c4; 
   font-family: "Consolas", "Courier New", monospace;
   font-size: 0.9rem;
 }
 
-/* Override the old green cursor for this theme */
 .console-input-line input:focus + .typing-cursor,
 .console-input-line .typing-cursor {
   background-color: #c4c4c4;
@@ -815,7 +813,7 @@ a[href*="spline.design"] {
 .console-wrapper {
   display: flex;
   justify-content: center;
-  padding: 3rem 1rem 4rem; /* Add more space around the console */
+  padding: 3rem 1rem 4rem; 
   background-color: var(--main-bg);
 }
 
@@ -918,11 +916,11 @@ a[href*="spline.design"] {
     transform: translateY(0);
   }
 }
-/* --- NEW: DIRECTIVE COMPONENT STYLES --- */
+/* DIRECTIVE COMPONENT STYLES */
 .directive-wrapper {
   display: flex;
   justify-content: center;
-  padding: 3rem 1rem 1rem; /* Less padding at the bottom */
+  padding: 3rem 1rem 1rem; 
   background-color: var(--main-bg);
 }
 .directive-container {
@@ -948,7 +946,7 @@ a[href*="spline.design"] {
 }
 .directive-body p {
   margin: 0;
-  min-height: 1.7rem; /* Prevents layout shift while typing */
+  min-height: 1.7rem;
 }
 .directive-body .typing-cursor {
   background-color: var(--accent-amber);
@@ -958,7 +956,7 @@ a[href*="spline.design"] {
 .console-wrapper {
   display: flex;
   justify-content: center;
-  padding: 1rem 1rem 4rem; /* Reduced top padding */
+  padding: 1rem 1rem 4rem; 
   background-color: var(--main-bg);
 }
 
@@ -1309,7 +1307,6 @@ a[href*="spline.design"] {
   white-space: nowrap;
 }
 
-/* When the case-closed class is added, the stamp fades in */
 .case-content.case-closed .case-closed-stamp {
   opacity: 0.8;
 }
@@ -1346,13 +1343,11 @@ audio {
 }
 
 
-/* Background of the entire controls panel */
 audio::-webkit-media-controls-panel {
   background-color: #111;
   border-radius: 5px;
 }
 
-/* Play/Pause & Volume Buttons */
 audio::-webkit-media-controls-play-button,
 audio::-webkit-media-controls-mute-button {
   background-color: var(--accent-green);
@@ -1363,7 +1358,7 @@ audio::-webkit-media-controls-play-button:hover {
   background-color: var(--text-color);
 }
 
-/* Hide the three-dot menu which contains the download button */
+
 audio::-webkit-media-controls-enclosure {
   display: none;
 }
@@ -1377,7 +1372,7 @@ audio::-webkit-media-controls-timeline {
   margin: 0 15px;
 }
 
-/* Progress Bar (the part that fills up) */
+/* Progress Bar  */
 audio::-webkit-media-controls-timeline::-webkit-progress-value {
   background-color: var(--accent-green);
   box-shadow: 0 0 5px var(--glow-color-green);
@@ -1538,13 +1533,12 @@ audio::-webkit-media-controls-time-remaining-display {
   max-width: 300px;
 }
 
-/* Hide all the old "coming soon" placeholder styles */
 .coming-soon-placeholder, .case-coming-soon-wrapper, .investigation-wrapper.coming-soon .coming-soon-overlay {
   display: none;
 }
 
 
-/* 1. Custom Target Cursor (from react-bits) */
+/* 1. Custom Target Cursor*/
 .target-cursor-wrapper { position: fixed; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 9999; mix-blend-mode: difference; transform: translate(-50%, -50%); }
 .target-cursor-dot { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); will-change: transform; }
 .target-cursor-corner { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border: 3px solid #fff; will-change: transform; }
@@ -1712,7 +1706,6 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   font-weight: bold;
 }
 
-/* Add this for the visual text block */
 .visual-puzzle-text {
     font-family: 'Courier New', Courier, monospace;
     background-color: rgba(0,0,0,0.3);
@@ -1721,7 +1714,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
     margin-bottom: 1.5rem;
     text-align: center;
     font-size: 1.2rem;
-    color: #555; /* Dim the noise */
+    color: #555;
     word-wrap: break-word;
 }
 .case-folder:hover .folder-front,
@@ -1737,13 +1730,12 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* --- FIX: Hide Custom Cursor & Add Tap Cue on Touch Devices --- */
 @media (hover: none) and (pointer: coarse) {
-  /* Hide the custom cursor */
+
   .target-cursor-wrapper {
     display: none !important;
   }
-  /* Restore default cursors */
+
   body, input, button, a {
      cursor: auto !important;
   }
@@ -1757,14 +1749,12 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
    #decryption-terminal {
      cursor: text !important;
    }
-
-   /* Optional: Add a slight visual cue on touch tap for folders */
    .case-folder:active {
      transform: scale(0.98);
      transition: transform 0.1s ease-out;
   }
 }
-/* === Mission Timer HUD === */
+/* Mission Timer HUD */
 .mission-timer-hud {
   position: fixed;
   bottom: 25px;
@@ -1778,7 +1768,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   max-width: 320px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
   animation: fadeIn 0.5s ease-out;
-  border-radius: 4px; /* Added for a cleaner look */
+  border-radius: 4px; 
 }
 
 .hud-timer {
@@ -1823,7 +1813,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   margin-bottom: 5px;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .mission-timer-hud {
     bottom: 15px;
@@ -1844,7 +1834,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
 .mission-timer-hud {
   transition: opacity 0.3s ease-in, visibility 0.3s, transform 0.3s ease-in;
 }
-/* === NEW: About Page Content Additions === */
+
 
 .about-page-revealed-wrapper {
   max-width: 900px;
@@ -1869,7 +1859,6 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   line-height: 1.6;
 }
 
-/* --- NEW: Ranking Table Style --- */
 .ranking-table {
   width: 100%;
   border-collapse: collapse;
@@ -1882,7 +1871,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
 .ranking-table thead {
   font-family: var(--font-mono);
   letter-spacing: 1px;
-  background-color: var(--accent-color-dark); /* Dark header */
+  background-color: var(--accent-color-dark);
 }
 
 .ranking-table th,
@@ -1897,24 +1886,22 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   color: var(--accent-color);
 }
 
-/* Row striping */
+
 .ranking-table tbody tr:nth-child(even) {
-  background-color: rgba(10, 20, 25, 0.7); /* Slightly darker for stripes */
+  background-color: rgba(10, 20, 25, 0.7); 
 }
 
-/* Rank colors */
+
 .ranking-table .rank-s { font-weight: bold; color: #FFD700; text-shadow: 0 0 5px #FFD700;}
 .ranking-table .rank-a { font-weight: bold; color: #c0c0c0; }
 .ranking-table .rank-b { font-weight: bold; color: #cd7f32; }
 .ranking-table .rank-c { font-weight: bold; color: #8B4513; }
 
-/* Table "typing" animation */
+
 .ranking-table.is-typing {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* --- NEW: Declassify Button & Final Reveal --- */
-/* === FINAL ACCESS TERMINAL (Declassify Creator) === */
 #final-access-terminal {
   background: rgba(10, 20, 25, 0.95);
   border: 2px solid var(--accent-teal);
@@ -1924,7 +1911,6 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   box-shadow: 0 0 20px var(--glow-color-teal);
 }
 
-/* Decorative corner borders */
 #final-access-terminal::before,
 #final-access-terminal::after {
   content: "";
@@ -2001,12 +1987,10 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   text-shadow: 0 0 8px var(--glow-color-red);
 }
 
-/* Shake animation for wrong password */
 #final-access-terminal.shake {
   animation: shake 0.5s;
 }
 
-/* Update final-reveal-section for proper fade-in */
 .final-reveal-section {
   opacity: 0;
   transform: translateY(20px);
@@ -2052,7 +2036,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   text-shadow: 0 0 10px #FFD700;
 }
 
-/* --- Responsive Table (Unchanged from before) --- */
+/* Table*/
 @media (max-width: 768px) {
   .ranking-table thead {
     display: none; 
@@ -2088,7 +2072,7 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
     font-size: 2rem;
   }
 }
-/* === FINAL ACCESS TERMINAL (Declassify Creator) === */
+/* Declassify Creator */
 #final-access-terminal {
   background: rgba(10, 20, 25, 0.95);
   border: 2px solid var(--accent-teal);

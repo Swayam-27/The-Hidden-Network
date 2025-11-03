@@ -7,10 +7,8 @@ const allCases = Object.keys(caseData).map(key => ({ id: key, ...caseData[key] }
 const CasesPage = () => {
   const [filter, setFilter] = useState('all');
 
-  // === 2. NEW: State for completion status ===
   const [completionStatus, setCompletionStatus] = useState({});
 
-  // On mount, read all completion statuses from localStorage
   useEffect(() => {
     const statuses = {};
     allCases.forEach(caseInfo => {
@@ -18,8 +16,7 @@ const CasesPage = () => {
       statuses[caseInfo.id] = isCompleted;
     });
     setCompletionStatus(statuses);
-  }, []); // Empty dependency array means this runs once on mount
-  // ==========================================
+  }, []); 
 
   return (
     <div className="page-container cases-page-container">

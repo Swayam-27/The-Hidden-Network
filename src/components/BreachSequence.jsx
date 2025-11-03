@@ -18,7 +18,6 @@ const BreachSequence = ({ onComplete }) => {
 
         const typeLine = () => {
             if (lineIndex >= sequenceLines.length) {
-                // Sequence complete
                 setIsTyping(false); 
                 timeouts.push(setTimeout(onComplete, 1000));
                 return;
@@ -39,7 +38,7 @@ const BreachSequence = ({ onComplete }) => {
                     return newLines;
                 });
                 charIndex++;
-                timeouts.push(setTimeout(typeLine, 50)); // Typing speed
+                timeouts.push(setTimeout(typeLine, 50)); 
             } else {
                 
                 lineIndex++;

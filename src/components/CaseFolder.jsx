@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// --- 1. Accept isCompleted prop ---
 const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) => {
   const [isPreview, setIsPreview] = useState(false);
 
@@ -16,8 +15,6 @@ const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) 
   const handleMouseLeave = () => {
     setIsPreview(false);
   };
-
-  // --- 2. Add 'is-completed' class to main folder ---
   const folderClassName = `case-folder cursor-target ${isPreview ? 'preview' : ''} ${!isVisible ? 'hidden' : ''} ${isCompleted ? 'is-completed' : ''}`;
 
   return (
@@ -40,15 +37,11 @@ const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) 
             <p>{description}</p>
           </div>
         </div>
-        
-        {/* --- 3. Conditionally render the [ COMPLETED ] tag --- */}
         {isCompleted && (
           <div className="paper-completed-tag">
             [ COMPLETED ]
           </div>
         )}
-        {/* --------------------------------------------------- */}
-        
       </div>
     </Link>
   );

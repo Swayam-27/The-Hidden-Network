@@ -162,12 +162,10 @@ const RevealedContent = ({ animate, onFinished }) => {
 
 const AboutPage = () => {
   const { accessGranted, grantAccess } = useAuth();
-  
-  // === PASSWORD CONFIGURATION ===
+
   const PROFESSOR_PASSWORD = "SWAYAM87";
-  const PASSWORD_VERSION = "v1"; // Change this to "v2", "v3", etc. when you update the password
-  // ===============================
-  
+  const PASSWORD_VERSION = "v1"; 
+
   const [step, setStep] = useState(
     accessGranted ? 'revealed_briefing' : 'authenticating'
   );
@@ -179,14 +177,12 @@ const AboutPage = () => {
   const [isShaking, setIsShaking] = useState(false);
   const inputRef = useRef(null);
 
-  // === VERSION-BASED PASSWORD STATE ===
   const [isFinalRevealed, setIsFinalRevealed] = useState(() => {
     const saved = localStorage.getItem('creatorDeclassified');
     const version = localStorage.getItem('creatorPasswordVersion');
     // Only load saved state if version matches current version
     return saved === 'true' && version === PASSWORD_VERSION;
   });
-  // ====================================
   
   const [finalInputValue, setFinalInputValue] = useState('');
   const [finalFeedback, setFinalFeedback] = useState('');
@@ -220,10 +216,8 @@ const AboutPage = () => {
     
     if (finalInputValue === PROFESSOR_PASSWORD) {
       setIsFinalRevealed(true);
-      // === SAVE WITH VERSION ===
       localStorage.setItem('creatorDeclassified', 'true');
       localStorage.setItem('creatorPasswordVersion', PASSWORD_VERSION);
-      // =========================
       setFinalFeedback('// IDENTITY DECLASSIFIED. //');
     } else {
       setFinalFeedback('// INCORRECT PROTOCOL //');

@@ -48,19 +48,17 @@ const Directive = ({ isVisible, onFinished }) => {
           return newLines;
         });
         charIndex.current++;
-        // TYPING SPEED
-        const typingSpeed = 15; // Was: 30-50ms
+        const typingSpeed = 15; 
         timeouts.push(setTimeout(type, typingSpeed));
       } else {
         lineIndex.current++;
         charIndex.current = 0;
-        // FASTER DELAY 
-        const delayBetweenLines = lineIndex.current === 2 ? 300 : 150; // Was: 600/300ms
+        const delayBetweenLines = lineIndex.current === 2 ? 300 : 150; 
         timeouts.push(setTimeout(type, delayBetweenLines));
       }
     };
 
-    timeouts.push(setTimeout(type, 250)); // Shorter initial delay
+    timeouts.push(setTimeout(type, 250)); 
     return () => timeouts.forEach(clearTimeout);
   }, [isVisible, onFinished]);
 

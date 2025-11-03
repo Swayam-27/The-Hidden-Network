@@ -8,11 +8,8 @@ import React, {
 import Spline from "@splinetool/react-spline";
 import Console from "../components/Console.jsx";
 import Directive from "../components/Directive.jsx";
-// ***
-// *** Preloader component code is unchanged...
-// ***
+
 const Preloader = ({ onFinished }) => {
-  // ... (No changes to Preloader logic) ...
   const [lines, setLines] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   const lineIndex = useRef(0);
@@ -32,7 +29,7 @@ const Preloader = ({ onFinished }) => {
           setTimeout(() => {
             setIsClosing(true);
             timeouts.push(setTimeout(onFinished, 800));
-          }, 500) // Shorter pause at the end
+          }, 500) 
         );
         return;
       }
@@ -48,12 +45,12 @@ const Preloader = ({ onFinished }) => {
           return newLines;
         });
         charIndex.current++;
-        const typingSpeed = 25; // Faster typing
+        const typingSpeed = 25; 
         timeouts.push(setTimeout(type, typingSpeed));
       } else {
         lineIndex.current++;
         charIndex.current = 0;
-        const delayBetweenLines = 150; // Faster delay
+        const delayBetweenLines = 150; 
         timeouts.push(setTimeout(type, delayBetweenLines));
       }
     };
@@ -79,10 +76,8 @@ const Preloader = ({ onFinished }) => {
 };
 
 
-// --- HomePage Component (UPDATED) ---
 const HomePage = ({ onLogin }) => {
   const [showPreloader, setShowPreloader] = useState(
-    // VVV PATCH 1: Using localStorage now VVV
     () => !localStorage.getItem("preloaderShown")
   );
   const [activeFragment, setActiveFragment] = useState(0);
@@ -125,12 +120,12 @@ const HomePage = ({ onLogin }) => {
   }, [showPreloader]);
 
   const handlePreloaderFinish = useCallback(() => {
-    // VVV PATCH 2: Using localStorage now VVV
+
     localStorage.setItem("preloaderShown", "true");
     setShowPreloader(false);
   }, []);
 
-  // ... (rest of the component is unchanged) ...
+
   const isMobile = window.innerWidth <= 768;
   const heroStyle = isMobile ? {
     backgroundImage: `linear-gradient(rgba(5, 6, 8, 0.9), rgba(5, 6, 8, 0.9)), url(/assets/static-background.jpg)`,

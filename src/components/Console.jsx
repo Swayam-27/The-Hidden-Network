@@ -1,9 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-// --- PATCH 1: Remove imports that bypass the prop system ---
-// import { useNavigate } from "react-router-dom"; 
-// import { useAuth } from "../context/AuthContext";
-
-// --- PATCH 2: Accept onLogin as a prop again ---
 const Console = ({ onLogin, startTyping }) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
@@ -12,9 +7,6 @@ const Console = ({ onLogin, startTyping }) => {
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
 
-  // --- PATCH 3: Remove the rogue auth/navigate logic ---
-  // const auth = useAuth();
-  // const navigate = useNavigate();
 
   const handleContainerClick = () => {
     inputRef.current?.focus();
@@ -76,7 +68,6 @@ const Console = ({ onLogin, startTyping }) => {
     }
   }, [lines, shouldScroll]);
 
-  // --- PATCH 4: Use the onLogin prop from App.jsx ---
   const handleCommand = (e) => {
     e.preventDefault();
     const command = input.toLowerCase().trim();
@@ -84,19 +75,18 @@ const Console = ({ onLogin, startTyping }) => {
     const baseCommand = args[0];
     const newLines = [...lines, `C:\\Users\\Agent>${input}`];
 
-    // --- (Removed the internal handleLogin function) ---
 
     switch (baseCommand) {
       case "goto":
         if (args[1] === "cases" || args[1] === "about") {
-          onLogin(`/${args[1]}`); // <-- This now correctly calls the prop
+          onLogin(`/${args[1]}`); 
         } else {
           newLines.push(`  '${input}' is not a valid GOTO command.`);
         }
         break;
       case "access":
         if (args[1]) {
-          onLogin(`/case/${args[1]}`); // <-- This now correctly calls the prop
+          onLogin(`/case/${args[1]}`); 
         } else {
           newLines.push("  ACCESS command requires a case-id.");
         }
@@ -132,7 +122,6 @@ const Console = ({ onLogin, startTyping }) => {
 
   return (
     <div className="console-wrapper">
-      {/* This cursor fix is correct and remains */}
       <div className="console-container cursor-target" onClick={handleContainerClick}>
         <div className="console-header">
           <p>C:\\WINDOWS\\system32\\cmd.exe</p>
