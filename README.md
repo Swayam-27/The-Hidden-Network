@@ -27,7 +27,7 @@ By combining storytelling, game design, and educational goals, this project turn
 
 ---
 
-## 💡 The Thesis Argument
+## 💡 Principle of the Operation
 This project is built to demonstrate three key concepts about intelligence and secrecy by making the user *experience* them:
 
 * **Secrecy is a barrier** - Access to knowledge must be earned (you must solve puzzles to unlock information).
