@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) => {
+const CaseFolder = ({
+  id,
+  title,
+  description,
+  imgSrc,
+  isVisible,
+  isCompleted,
+  playHover,
+  playClick,
+}) => {
   const [isPreview, setIsPreview] = useState(false);
 
   const handleClick = (e) => {
-    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (playClick) playClick();
+    const isTouchDevice = window.matchMedia(
+      '(hover: none) and (pointer: coarse)'
+    ).matches;
     if (isTouchDevice && !isPreview) {
       e.preventDefault();
       setIsPreview(true);
@@ -15,13 +27,16 @@ const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) 
   const handleMouseLeave = () => {
     setIsPreview(false);
   };
-  const folderClassName = `case-folder cursor-target ${isPreview ? 'preview' : ''} ${!isVisible ? 'hidden' : ''} ${isCompleted ? 'is-completed' : ''}`;
+  const folderClassName = `case-folder cursor-target ${
+    isPreview ? 'preview' : ''
+  } ${!isVisible ? 'hidden' : ''} ${isCompleted ? 'is-completed' : ''}`;
 
   return (
-    <Link 
-      to={`/case/${id}`} 
+    <Link
+      to={`/case/${id}`}
       className={folderClassName.trim()}
       onClick={handleClick}
+      onMouseEnter={playHover}
       onMouseLeave={handleMouseLeave}
       aria-hidden={!isVisible}
       tabIndex={isVisible ? 0 : -1}
@@ -37,11 +52,7 @@ const CaseFolder = ({ id, title, description, imgSrc, isVisible, isCompleted }) 
             <p>{description}</p>
           </div>
         </div>
-        {isCompleted && (
-          <div className="paper-completed-tag">
-            [ COMPLETED ]
-          </div>
-        )}
+        {isCompleted && <div className="paper-completed-tag">[ COMPLETED ]</div>}
       </div>
     </Link>
   );

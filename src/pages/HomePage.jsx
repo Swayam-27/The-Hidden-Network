@@ -9,7 +9,7 @@ import Spline from "@splinetool/react-spline";
 import Console from "../components/Console.jsx";
 import Directive from "../components/Directive.jsx";
 
-const Preloader = ({ onFinished }) => {
+const Preloader = ({ onFinished, playTypingLoop, stopTypingLoop }) => {
   const [lines, setLines] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   const lineIndex = useRef(0);
@@ -22,14 +22,16 @@ const Preloader = ({ onFinished }) => {
   ];
 
   useEffect(() => {
+    playTypingLoop();
     const timeouts = [];
     const type = () => {
       if (lineIndex.current >= preloaderLines.length) {
         timeouts.push(
           setTimeout(() => {
             setIsClosing(true);
+            stopTypingLoop();
             timeouts.push(setTimeout(onFinished, 800));
-          }, 500) 
+          }, 500)
         );
         return;
       }
@@ -45,18 +47,21 @@ const Preloader = ({ onFinished }) => {
           return newLines;
         });
         charIndex.current++;
-        const typingSpeed = 25; 
+        const typingSpeed = 25;
         timeouts.push(setTimeout(type, typingSpeed));
       } else {
         lineIndex.current++;
         charIndex.current = 0;
-        const delayBetweenLines = 150; 
+        const delayBetweenLines = 150;
         timeouts.push(setTimeout(type, delayBetweenLines));
       }
     };
     timeouts.push(setTimeout(type, 250));
-    return () => timeouts.forEach(clearTimeout);
-  }, [onFinished]);
+    return () => {
+      timeouts.forEach(clearTimeout);
+      stopTypingLoop();
+    };
+  }, [onFinished, playTypingLoop, stopTypingLoop]);
 
   return (
     <div id="preloader" className={isClosing ? "closing" : ""}>
@@ -75,8 +80,7 @@ const Preloader = ({ onFinished }) => {
   );
 };
 
-
-const HomePage = ({ onLogin }) => {
+const HomePage = ({ onLogin, onPreloaderFinish, appState, ...audioProps }) => {
   const [showPreloader, setShowPreloader] = useState(
     () => !localStorage.getItem("preloaderShown")
   );
@@ -120,22 +124,25 @@ const HomePage = ({ onLogin }) => {
   }, [showPreloader]);
 
   const handlePreloaderFinish = useCallback(() => {
-
     localStorage.setItem("preloaderShown", "true");
     setShowPreloader(false);
-  }, []);
-
+    if (onPreloaderFinish) {
+      onPreloaderFinish();
+    }
+  }, [onPreloaderFinish]);
 
   const isMobile = window.innerWidth <= 768;
-  const heroStyle = isMobile ? {
-    backgroundImage: `linear-gradient(rgba(5, 6, 8, 0.9), rgba(5, 6, 8, 0.9)), url(/assets/static-background.jpg)`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center center',
-    backgroundRepeat: 'no-repeat',
-  } : {};
+  const heroStyle = isMobile
+    ? {
+        backgroundImage: `linear-gradient(rgba(5, 6, 8, 0.9), rgba(5, 6, 8, 0.9)), url(/assets/static-background.jpg)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundRepeat: "no-repeat",
+      }
+    : {};
 
-  if (showPreloader) {
-    return <Preloader onFinished={handlePreloaderFinish} />;
+  if (appState === "PRELOADING" || showPreloader) {
+    return <Preloader onFinished={handlePreloaderFinish} {...audioProps} />;
   }
 
   return (
@@ -153,10 +160,10 @@ const HomePage = ({ onLogin }) => {
           </Suspense>
         </div>
 
-        <img 
-          src="/assets/logo-mobile.png" 
-          alt="The Hidden Network" 
-          className="hero-logo-mobile" 
+        <img
+          src="/assets/logo-mobile.png"
+          alt="The Hidden Network"
+          className="hero-logo-mobile"
         />
 
         <div className="hero-subtitle">
@@ -178,7 +185,13 @@ const HomePage = ({ onLogin }) => {
         </div>
 
         {showScrollIndicator && (
-          <div className="scroll-prompt-container">
+          <div
+            className="scroll-prompt-container cursor-target"
+            onClick={() =>
+              directiveRef.current?.scrollIntoView({ behavior: "smooth" })
+            }
+            onMouseEnter={audioProps.playHover}
+          >
             <span className="scroll-text">SCROLL DOWN</span>
             <div className="scroll-arrow"></div>
           </div>
@@ -189,10 +202,12 @@ const HomePage = ({ onLogin }) => {
         <Directive
           isVisible={directiveVisible}
           onFinished={() => setDirectiveFinished(true)}
+          {...audioProps}
         />
         <Console
-          onLogin={onLogin} 
+          onLogin={onLogin}
           startTyping={directiveFinished}
+          {...audioProps}
         />
       </div>
     </>

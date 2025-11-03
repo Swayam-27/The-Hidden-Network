@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import Loader from './components/Loader';
 import BreachSequence from './components/BreachSequence';
-import TargetCursor from './components/Cursor'; 
+import TargetCursor from './components/Cursor';
 
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const CasesPage = React.lazy(() => import('./pages/CasesPage'));
@@ -18,7 +18,7 @@ const AppState = {
   AUTHENTICATING: 'AUTHENTICATING',
   BREACHING: 'BREACHING',
   INSIDER: 'INSIDER',
-  NAVIGATING: 'NAVIGATING', 
+  NAVIGATING: 'NAVIGATING',
 };
 
 const ProtectedRoute = ({ children }) => {
@@ -34,6 +34,85 @@ export default function App() {
   const [appState, setAppState] = useState(AppState.PRELOADING);
   const [breachTarget, setBreachTarget] = useState(null);
   const navigate = useNavigate();
+
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+
+  const hoverSoundRef = useRef(new Audio('/assets/ui-hover.mp3'));
+  const clickSoundRef = useRef(new Audio('/assets/ui-click.mp3'));
+  const keypressSoundRef = useRef(new Audio('/assets/keypress.mp3'));
+  const enterSoundRef = useRef(new Audio('/assets/enter-key.mp3'));
+  const typingLoopRef = useRef(new Audio('/assets/typing-loop.mp3'));
+
+  useEffect(() => {
+    typingLoopRef.current.loop = true;
+    typingLoopRef.current.volume = 0.5;
+
+    hoverSoundRef.current.volume = 0.5;
+    clickSoundRef.current.volume = 0.5;
+    keypressSoundRef.current.volume = 0.4;
+    enterSoundRef.current.volume = 0.6;
+  }, []);
+
+  const unlockAudio = useCallback(() => {
+    if (isAudioUnlocked) return true;
+
+    try {
+      hoverSoundRef.current.load();
+      clickSoundRef.current.load();
+      keypressSoundRef.current.load();
+      enterSoundRef.current.load();
+      typingLoopRef.current.load();
+      setIsAudioUnlocked(true);
+      return true;
+    } catch (e) {
+      console.error("Audio unlock failed:", e);
+      return false;
+    }
+  }, [isAudioUnlocked]);
+
+  const playHover = useCallback(() => {
+    if (!unlockAudio()) return;
+    hoverSoundRef.current.currentTime = 0;
+    hoverSoundRef.current.play().catch(e => {});
+  }, [unlockAudio]);
+
+  const playClick = useCallback(() => {
+    if (!unlockAudio()) return;
+    clickSoundRef.current.currentTime = 0;
+    clickSoundRef.current.play().catch(e => {});
+  }, [unlockAudio]);
+
+  const playKeypress = useCallback(() => {
+    if (!unlockAudio()) return;
+    keypressSoundRef.current.currentTime = 0;
+    keypressSoundRef.current.play().catch(e => {});
+  }, [unlockAudio]);
+
+  const playEnter = useCallback(() => {
+    if (!unlockAudio()) return;
+    enterSoundRef.current.currentTime = 0;
+    enterSoundRef.current.play().catch(e => {});
+  }, [unlockAudio]);
+
+  const playTypingLoop = useCallback(() => {
+    if (!unlockAudio()) return;
+    typingLoopRef.current.currentTime = 0;
+    typingLoopRef.current.play().catch(e => {});
+  }, [unlockAudio]);
+
+  const stopTypingLoop = useCallback(() => {
+    typingLoopRef.current.pause();
+    typingLoopRef.current.currentTime = 0;
+  }, []);
+
+  const audioProps = {
+    playHover,
+    playClick,
+    playKeypress,
+    playEnter,
+    playTypingLoop,
+    stopTypingLoop,
+  };
 
   useEffect(() => {
     const preloaderShown = localStorage.getItem('preloaderShown') === 'true';
@@ -52,20 +131,23 @@ export default function App() {
   }, []);
 
   const handleLogin = useCallback((path) => {
+    playEnter();
     const breachShown = localStorage.getItem('breachAnimationShown') === 'true';
 
     if (!breachShown) {
       setBreachTarget(path);
       setAppState(AppState.BREACHING);
     } else {
-      if (!isInsider) login();
+      if (!isInsider) {
+        login();
+      }
       setAppState(AppState.NAVIGATING);
       setTimeout(() => {
         navigate(path);
-        setAppState(AppState.INSIDER); 
-      }, 500); 
+        setAppState(AppState.INSIDER);
+      }, 500);
     }
-  }, [isInsider, login, navigate]);
+  }, [isInsider, login, navigate, playEnter]);
 
   const handleBreachComplete = useCallback(() => {
     localStorage.setItem('breachAnimationShown', 'true');
@@ -75,52 +157,61 @@ export default function App() {
   }, [isInsider, login, navigate, breachTarget]);
 
   if (appState === AppState.BREACHING) {
-    return <BreachSequence onComplete={handleBreachComplete} />;
+    return <BreachSequence onComplete={handleBreachComplete} {...audioProps} />;
   }
-  
+
   if (appState === AppState.NAVIGATING) {
-    return <Loader />;
+    return <Loader {...audioProps} />;
   }
-  
+
   return (
     <>
       <TargetCursor targetSelector=".cursor-target" />
 
-      {appState === AppState.INSIDER && <Navbar />}
-      
-      <main>
-        <Suspense fallback={<Loader />}>
-          <Routes>
-            <Route path="/" element={<HomePage onLogin={handleLogin} onPreloaderFinish={handlePreloaderFinish} appState={appState} />} />
+      {appState === AppState.INSIDER && <Navbar {...audioProps} />}
 
-            <Route 
-              path="/cases" 
+      <main>
+        <Suspense fallback={<Loader {...audioProps} />}>
+          <Routes>
+            <Route
+              path="/"
               element={
-                <ProtectedRoute>
-                  <CasesPage />
-                </ProtectedRoute>
-              } 
+                <HomePage
+                  onLogin={handleLogin}
+                  onPreloaderFinish={handlePreloaderFinish}
+                  appState={appState}
+                  {...audioProps}
+                />
+              }
             />
-            <Route 
-              path="/case/:caseId" 
+            <Route
+              path="/cases"
               element={
                 <ProtectedRoute>
-                  <CaseDetailPage />
+                  <CasesPage {...audioProps} />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/about" 
+            <Route
+              path="/case/:caseId"
               element={
                 <ProtectedRoute>
-                  <AboutPage />
+                  <CaseDetailPage {...audioProps} />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <ProtectedRoute>
+                  <AboutPage {...audioProps} />
+                </ProtectedRoute>
+              }
             />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      <Footer {...audioProps} />
     </>
   );
 }

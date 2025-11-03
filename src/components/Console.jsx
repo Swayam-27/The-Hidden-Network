@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
-const Console = ({ onLogin, startTyping }) => {
+
+const Console = ({
+  onLogin,
+  startTyping,
+  playKeypress,
+  playEnter,
+  playTypingLoop,
+  stopTypingLoop,
+}) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
   const [readyForInput, setReadyForInput] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(false);
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
-
 
   const handleContainerClick = () => {
     inputRef.current?.focus();
@@ -15,15 +22,17 @@ const Console = ({ onLogin, startTyping }) => {
   useEffect(() => {
     if (!startTyping) return;
     setShouldScroll(true);
-    
+
     const welcomeShown =
       localStorage.getItem("welcomeMessageShown") === "true";
-      
+
     if (welcomeShown) {
       setLines([""]);
       setReadyForInput(true);
       return;
     }
+
+    if (playTypingLoop) playTypingLoop();
     const timestamp = new Date();
     const sessionId = Math.random().toString(16).slice(2, 10).toUpperCase();
     const welcomeMessage = [
@@ -40,6 +49,7 @@ const Console = ({ onLogin, startTyping }) => {
       if (lineIndex >= welcomeMessage.length) {
         localStorage.setItem("welcomeMessageShown", "true");
         setReadyForInput(true);
+        if (stopTypingLoop) stopTypingLoop();
         return;
       }
       if (charIndex === 0) setLines((prev) => [...prev, ""]);
@@ -51,16 +61,19 @@ const Console = ({ onLogin, startTyping }) => {
           return newLines;
         });
         charIndex++;
-        timeouts.push(setTimeout(type, 10)); 
+        timeouts.push(setTimeout(type, 10));
       } else {
         lineIndex++;
         charIndex = 0;
-        timeouts.push(setTimeout(type, 25)); 
+        timeouts.push(setTimeout(type, 25));
       }
     };
     timeouts.push(setTimeout(type, 250));
-    return () => timeouts.forEach(clearTimeout);
-  }, [startTyping]);
+    return () => {
+      timeouts.forEach(clearTimeout);
+      if (stopTypingLoop) stopTypingLoop();
+    };
+  }, [startTyping, playTypingLoop, stopTypingLoop]);
 
   useEffect(() => {
     if (shouldScroll) {
@@ -70,23 +83,23 @@ const Console = ({ onLogin, startTyping }) => {
 
   const handleCommand = (e) => {
     e.preventDefault();
+    if (playEnter) playEnter();
     const command = input.toLowerCase().trim();
     const args = command.split(" ");
     const baseCommand = args[0];
     const newLines = [...lines, `C:\\Users\\Agent>${input}`];
 
-
     switch (baseCommand) {
       case "goto":
         if (args[1] === "cases" || args[1] === "about") {
-          onLogin(`/${args[1]}`); 
+          onLogin(`/${args[1]}`);
         } else {
           newLines.push(`  '${input}' is not a valid GOTO command.`);
         }
         break;
       case "access":
         if (args[1]) {
-          onLogin(`/case/${args[1]}`); 
+          onLogin(`/case/${args[1]}`);
         } else {
           newLines.push("  ACCESS command requires a case-id.");
         }
@@ -120,9 +133,18 @@ const Console = ({ onLogin, startTyping }) => {
     setInput("");
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key !== 'Enter' && playKeypress) {
+      playKeypress();
+    }
+  };
+
   return (
     <div className="console-wrapper">
-      <div className="console-container cursor-target" onClick={handleContainerClick}>
+      <div
+        className="console-container cursor-target"
+        onClick={handleContainerClick}
+      >
         <div className="console-header">
           <p>C:\\WINDOWS\\system32\\cmd.exe</p>
         </div>
@@ -140,6 +162,7 @@ const Console = ({ onLogin, startTyping }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             autoComplete="off"
             autoFocus={readyForInput}
           />
