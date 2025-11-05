@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import CaseFolder from '../components/CaseFolder.jsx';
-import { caseData } from '../caseData.js';
+import React, { useState, useEffect } from "react";
+import CaseFolder from "../components/CaseFolder.jsx";
+import { caseData } from "../caseData.js";
 
-const allCases = Object.keys(caseData).map(key => ({ id: key, ...caseData[key] }));
+const allCases = Object.keys(caseData).map((key) => ({
+  id: key,
+  ...caseData[key],
+}));
 
 const CasesPage = ({ playHover, playClick }) => {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [completionStatus, setCompletionStatus] = useState({});
 
   useEffect(() => {
     const statuses = {};
-    allCases.forEach(caseInfo => {
-      const isCompleted = localStorage.getItem(`case_${caseInfo.id}_completed`) === 'true';
+    allCases.forEach((caseInfo) => {
+      const isCompleted =
+        localStorage.getItem(`case_${caseInfo.id}_completed`) === "true";
       statuses[caseInfo.id] = isCompleted;
     });
     setCompletionStatus(statuses);
@@ -29,30 +33,36 @@ const CasesPage = ({ playHover, playClick }) => {
           <h2>THE VAULT (UNLOCKED)</h2>
           <div className="filter-controls">
             <button
-              onClick={() => handleFilterClick('all')}
+              onClick={() => handleFilterClick("all")}
               onMouseEnter={playHover}
-              className={`cursor-target ${filter === 'all' ? 'active' : ''}`}
+              className={`cursor-target ${filter === "all" ? "active" : ""}`}
             >
               ALL
             </button>
             <button
-              onClick={() => handleFilterClick('cyber-warfare')}
+              onClick={() => handleFilterClick("cyber-warfare")}
               onMouseEnter={playHover}
-              className={`cursor-target ${filter === 'cyber-warfare' ? 'active' : ''}`}
+              className={`cursor-target ${
+                filter === "cyber-warfare" ? "active" : ""
+              }`}
             >
               CYBER WARFARE
             </button>
             <button
-              onClick={() => handleFilterClick('data-privacy')}
+              onClick={() => handleFilterClick("data-privacy")}
               onMouseEnter={playHover}
-              className={`cursor-target ${filter === 'data-privacy' ? 'active' : ''}`}
+              className={`cursor-target ${
+                filter === "data-privacy" ? "active" : ""
+              }`}
             >
               DATA & PRIVACY
             </button>
             <button
-              onClick={() => handleFilterClick('financial-crime')}
+              onClick={() => handleFilterClick("financial-crime")}
               onMouseEnter={playHover}
-              className={`cursor-target ${filter === 'financial-crime' ? 'active' : ''}`}
+              className={`cursor-target ${
+                filter === "financial-crime" ? "active" : ""
+              }`}
             >
               FINANCIAL CRIME
             </button>
@@ -60,11 +70,11 @@ const CasesPage = ({ playHover, playClick }) => {
         </div>
       </div>
       <main className="case-files-container">
-        {allCases.map(caseInfo => (
+        {allCases.map((caseInfo) => (
           <CaseFolder
             key={caseInfo.id}
             {...caseInfo}
-            isVisible={filter === 'all' || filter === caseInfo.category}
+            isVisible={filter === "all" || filter === caseInfo.category}
             isCompleted={completionStatus[caseInfo.id] || false}
             playHover={playHover}
             playClick={playClick}
