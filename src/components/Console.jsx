@@ -7,10 +7,12 @@ const Console = ({
   playEnter,
   playTypingLoop,
   stopTypingLoop,
+  agentName,
+  updateAgentName,
 }) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
-  const [readyForInput, setReadyForInput] = useState(false);
+  const [consoleState, setConsoleState] = useState("TYPING_WELCOME");
   const [shouldScroll, setShouldScroll] = useState(false);
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
@@ -23,12 +25,12 @@ const Console = ({
     if (!startTyping) return;
     setShouldScroll(true);
 
-    const welcomeShown =
-      localStorage.getItem("welcomeMessageShown") === "true";
+    const welcomeShown = localStorage.getItem("welcomeMessageShown") === "true";
+    const nameRegistered = localStorage.getItem("agentName") !== null;
 
-    if (welcomeShown) {
+    if (welcomeShown && nameRegistered) {
       setLines([""]);
-      setReadyForInput(true);
+      setConsoleState("AWAITING_COMMAND");
       return;
     }
 
@@ -39,16 +41,26 @@ const Console = ({
       `[SESSION ID: ${sessionId}]`,
       `[TIMESTAMP: ${timestamp.toISOString()}]`,
       "",
-      "System online. Awaiting input.",
-      "Type HELP for a list of available commands.",
+      "System online.",
     ];
+
+    if (!nameRegistered) {
+      welcomeMessage.push("PLEASE REGISTER YOUR AGENT CODENAME:");
+    } else {
+      welcomeMessage.push("Awaiting input. Type HELP for commands.");
+    }
+
     let lineIndex = 0;
     let charIndex = 0;
     const timeouts = [];
     const type = () => {
       if (lineIndex >= welcomeMessage.length) {
         localStorage.setItem("welcomeMessageShown", "true");
-        setReadyForInput(true);
+        if (nameRegistered) {
+          setConsoleState("AWAITING_COMMAND");
+        } else {
+          setConsoleState("AWAITING_NAME");
+        }
         if (stopTypingLoop) stopTypingLoop();
         return;
       }
@@ -84,10 +96,24 @@ const Console = ({
   const handleCommand = (e) => {
     e.preventDefault();
     if (playEnter) playEnter();
+
+    if (consoleState === "AWAITING_NAME") {
+      const newName = input.trim() || "AGENT";
+      updateAgentName(newName);
+      setLines([
+        ...lines,
+        `> CODENAME [${newName.toUpperCase()}] REGISTERED.`,
+        "> Awaiting input. Type HELP for commands.",
+      ]);
+      setInput("");
+      setConsoleState("AWAITING_COMMAND");
+      return;
+    }
+
     const command = input.toLowerCase().trim();
     const args = command.split(" ");
     const baseCommand = args[0];
-    const newLines = [...lines, `C:\\Users\\Agent>${input}`];
+    const newLines = [...lines, `C:\\Users\\${agentName}>${input}`];
 
     switch (baseCommand) {
       case "goto":
@@ -118,7 +144,7 @@ const Console = ({
         setInput("");
         return;
       case "whoami":
-        newLines.push("  > Designation: Unknown. Status: Agent.");
+        newLines.push(`  > Designation: [${agentName}]. Status: Agent.`);
         break;
       case "cipher":
         newLines.push("  > The Librarian of this archive.");
@@ -134,10 +160,23 @@ const Console = ({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key !== 'Enter' && playKeypress) {
+    if (e.key !== "Enter" && playKeypress) {
       playKeypress();
     }
   };
+
+  const getPrompt = () => {
+    if (consoleState === "AWAITING_NAME") {
+      return <span>REGISTER CODENAME:&gt;</span>;
+    }
+    if (consoleState === "AWAITING_COMMAND") {
+      return <span>C:\\Users\\{agentName}&gt;</span>;
+    }
+    return null;
+  };
+
+  const autoFocusInput =
+    consoleState === "AWAITING_NAME" || consoleState === "AWAITING_COMMAND";
 
   return (
     <div className="console-wrapper">
@@ -154,19 +193,22 @@ const Console = ({
           ))}
           <div ref={endOfConsoleRef} />
         </div>
-        <form onSubmit={handleCommand} className="console-input-line">
-          <span>C:\\Users\\Agent&gt;</span>
-          <input
-            id="console-input"
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoComplete="off"
-            autoFocus={readyForInput}
-          />
-        </form>
+        {(consoleState === "AWAITING_NAME" ||
+          consoleState === "AWAITING_COMMAND") && (
+          <form onSubmit={handleCommand} className="console-input-line">
+            {getPrompt()}
+            <input
+              id="console-input"
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoComplete="off"
+              autoFocus={autoFocusInput}
+            />
+          </form>
+        )}
       </div>
     </div>
   );

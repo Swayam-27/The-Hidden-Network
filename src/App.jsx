@@ -1,24 +1,37 @@
-import React, { useState, useEffect, Suspense, useCallback, useRef } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import React, {
+  useState,
+  useEffect,
+  Suspense,
+  useCallback,
+  useRef,
+} from "react";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-import Navbar from './components/Navbar';
-import Footer from './components/footer';
-import Loader from './components/Loader';
-import BreachSequence from './components/BreachSequence';
-import TargetCursor from './components/Cursor';
+import Navbar from "./components/Navbar";
+import Footer from "./components/footer";
+import Loader from "./components/Loader";
+import BreachSequence from "./components/BreachSequence";
+import TargetCursor from "./components/Cursor";
+import MissionLog from "./components/MissionLog";
 
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const CasesPage = React.lazy(() => import('./pages/CasesPage'));
-const CaseDetailPage = React.lazy(() => import('./pages/CaseDetailPage'));
-const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const HomePage = React.lazy(() => import("./pages/HomePage"));
+const CasesPage = React.lazy(() => import("./pages/CasesPage"));
+const CaseDetailPage = React.lazy(() => import("./pages/CaseDetailPage"));
+const AboutPage = React.lazy(() => import("./pages/AboutPage"));
 
 const AppState = {
-  PRELOADING: 'PRELOADING',
-  AUTHENTICATING: 'AUTHENTICATING',
-  BREACHING: 'BREACHING',
-  INSIDER: 'INSIDER',
-  NAVIGATING: 'NAVIGATING',
+  PRELOADING: "PRELOADING",
+  AUTHENTICATING: "AUTHENTICATING",
+  BREACHING: "BREACHING",
+  INSIDER: "INSIDER",
+  NAVIGATING: "NAVIGATING",
 };
 
 const ProtectedRoute = ({ children }) => {
@@ -34,14 +47,18 @@ export default function App() {
   const [appState, setAppState] = useState(AppState.PRELOADING);
   const [breachTarget, setBreachTarget] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
+  const [agentName, setAgentName] = useState(
+    () => localStorage.getItem("agentName") || "AGENT"
+  );
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
-  const hoverSoundRef = useRef(new Audio('/assets/ui-hover.mp3'));
-  const clickSoundRef = useRef(new Audio('/assets/ui-click.mp3'));
-  const keypressSoundRef = useRef(new Audio('/assets/keypress.mp3'));
-  const enterSoundRef = useRef(new Audio('/assets/enter-key.mp3'));
-  const typingLoopRef = useRef(new Audio('/assets/typing-loop.mp3'));
+  const hoverSoundRef = useRef(new Audio("/assets/ui-hover.mp3"));
+  const clickSoundRef = useRef(new Audio("/assets/ui-click.mp3"));
+  const keypressSoundRef = useRef(new Audio("/assets/keypress.mp3"));
+  const enterSoundRef = useRef(new Audio("/assets/enter-key.mp3"));
+  const typingLoopRef = useRef(new Audio("/assets/typing-loop.mp3"));
 
   useEffect(() => {
     typingLoopRef.current.loop = true;
@@ -73,36 +90,42 @@ export default function App() {
   const playHover = useCallback(() => {
     if (!unlockAudio()) return;
     hoverSoundRef.current.currentTime = 0;
-    hoverSoundRef.current.play().catch(e => {});
+    hoverSoundRef.current.play().catch((e) => {});
   }, [unlockAudio]);
 
   const playClick = useCallback(() => {
     if (!unlockAudio()) return;
     clickSoundRef.current.currentTime = 0;
-    clickSoundRef.current.play().catch(e => {});
+    clickSoundRef.current.play().catch((e) => {});
   }, [unlockAudio]);
 
   const playKeypress = useCallback(() => {
     if (!unlockAudio()) return;
     keypressSoundRef.current.currentTime = 0;
-    keypressSoundRef.current.play().catch(e => {});
+    keypressSoundRef.current.play().catch((e) => {});
   }, [unlockAudio]);
 
   const playEnter = useCallback(() => {
     if (!unlockAudio()) return;
     enterSoundRef.current.currentTime = 0;
-    enterSoundRef.current.play().catch(e => {});
+    enterSoundRef.current.play().catch((e) => {});
   }, [unlockAudio]);
 
   const playTypingLoop = useCallback(() => {
     if (!unlockAudio()) return;
     typingLoopRef.current.currentTime = 0;
-    typingLoopRef.current.play().catch(e => {});
+    typingLoopRef.current.play().catch((e) => {});
   }, [unlockAudio]);
 
   const stopTypingLoop = useCallback(() => {
     typingLoopRef.current.pause();
     typingLoopRef.current.currentTime = 0;
+  }, []);
+
+  const updateAgentName = useCallback((name) => {
+    const safeName = name.trim().toUpperCase() || "AGENT";
+    setAgentName(safeName);
+    localStorage.setItem("agentName", safeName);
   }, []);
 
   const audioProps = {
@@ -115,7 +138,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const preloaderShown = localStorage.getItem('preloaderShown') === 'true';
+    const preloaderShown = localStorage.getItem("preloaderShown") === "true";
     if (!preloaderShown) {
       setAppState(AppState.PRELOADING);
     } else if (isInsider) {
@@ -126,31 +149,35 @@ export default function App() {
   }, [isInsider]);
 
   const handlePreloaderFinish = useCallback(() => {
-    localStorage.setItem('preloaderShown', 'true');
+    localStorage.setItem("preloaderShown", "true");
     setAppState(AppState.AUTHENTICATING);
   }, []);
 
-  const handleLogin = useCallback((path) => {
-    playEnter();
-    const breachShown = localStorage.getItem('breachAnimationShown') === 'true';
+  const handleLogin = useCallback(
+    (path) => {
+      playEnter();
+      const breachShown =
+        localStorage.getItem("breachAnimationShown") === "true";
 
-    if (!breachShown) {
-      setBreachTarget(path);
-      setAppState(AppState.BREACHING);
-    } else {
-      if (!isInsider) {
-        login();
+      if (!breachShown) {
+        setBreachTarget(path);
+        setAppState(AppState.BREACHING);
+      } else {
+        if (!isInsider) {
+          login();
+        }
+        setAppState(AppState.NAVIGATING);
+        setTimeout(() => {
+          navigate(path);
+          setAppState(AppState.INSIDER);
+        }, 500);
       }
-      setAppState(AppState.NAVIGATING);
-      setTimeout(() => {
-        navigate(path);
-        setAppState(AppState.INSIDER);
-      }, 500);
-    }
-  }, [isInsider, login, navigate, playEnter]);
+    },
+    [isInsider, login, navigate, playEnter]
+  );
 
   const handleBreachComplete = useCallback(() => {
-    localStorage.setItem('breachAnimationShown', 'true');
+    localStorage.setItem("breachAnimationShown", "true");
     if (!isInsider) login();
     setAppState(AppState.INSIDER);
     if (breachTarget) navigate(breachTarget);
@@ -164,11 +191,18 @@ export default function App() {
     return <Loader {...audioProps} />;
   }
 
+  const onCasePage = location.pathname.startsWith("/case/");
+
   return (
     <>
       <TargetCursor targetSelector=".cursor-target" />
 
-      {appState === AppState.INSIDER && <Navbar {...audioProps} />}
+      {appState === AppState.INSIDER && (
+        <>
+          <Navbar {...audioProps} />
+          {!onCasePage && <MissionLog agentName={agentName} />}
+        </>
+      )}
 
       <main>
         <Suspense fallback={<Loader {...audioProps} />}>
@@ -180,6 +214,8 @@ export default function App() {
                   onLogin={handleLogin}
                   onPreloaderFinish={handlePreloaderFinish}
                   appState={appState}
+                  agentName={agentName}
+                  updateAgentName={updateAgentName}
                   {...audioProps}
                 />
               }
