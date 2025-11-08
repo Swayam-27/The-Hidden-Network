@@ -2744,12 +2744,22 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
 .hud-stat-item {
   color: #aaa;
 }
-.rank-s { color: #FFD700; text-shadow: 0 0 5px #FFD700;}
-.rank-a { color: #c0c0c0; }
-.rank-b { color: #cd7f32; }
-.rank-c { color: var(--secondary-red); }
-.rank-n { color: #888; }
-
+.rank-s {
+  color: #ffd700;
+  text-shadow: 0 0 5px #ffd700;
+}
+.rank-a {
+  color: #c0c0c0;
+}
+.rank-b {
+  color: #cd7f32;
+}
+.rank-c {
+  color: var(--secondary-red);
+}
+.rank-n {
+  color: #888;
+}
 
 /* --- BRIEFING & COUNTDOWN MODAL --- */
 .briefing-modal-overlay {
@@ -2822,26 +2832,33 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
   animation: countdown-pulse 1s infinite;
 }
 @keyframes countdown-pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .target-cursor-wrapper {
   z-index: 20002; /* Ensure cursor is on top of everything */
 }
 
-
 @media (max-width: 767px) {
   .mission-log-hud {
     display: none; /* Hide on mobile, too much clutter */
   }
-  
 
   .case-nav {
-    margin-bottom: 6rem; 
+    margin-bottom: 6rem;
   }
-  
+
   .briefing-modal {
     padding: 1rem;
   }
@@ -2929,4 +2946,131 @@ body:has(input[type="text"]:hover) .target-cursor-wrapper {
 .hud-time-value {
   color: var(--accent-teal);
   text-shadow: 0 0 5px var(--glow-color-teal);
+}
+
+.console-action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.5rem 1rem;
+  background-color: var(--folder-bg);
+  border-top: 1px solid var(--folder-border);
+  gap: 10px;
+}
+
+.console-action-buttons button {
+  background: transparent;
+  border: 1px solid var(--accent-teal);
+  color: var(--accent-teal);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.console-action-buttons button:hover {
+  background-color: var(--accent-teal);
+  color: var(--main-bg);
+  box-shadow: 0 0 8px var(--glow-color-teal);
+}
+
+.console-input-line {
+  padding-top: 0.5rem;
+}
+/* --- CONSOLE TAUNT STYLING --- */
+.taunt-line {
+  color: var(--secondary-red) !important;
+  font-weight: bold;
+  text-shadow: 0 0 5px var(--glow-color-red);
+  animation: taunt-flicker 0.2s infinite;
+}
+
+@keyframes taunt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.console-output p {
+  color: var(--accent-green);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+  font-family: var(--font-primary);
+}
+.console-input-line span {
+  color: var(--accent-green);
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+}
+.console-input-line input {
+  color: var(--accent-teal);
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  width: 100%;
+}
+/* --- LEADERBOARD HUD TABLE STYLES (Replaces Timer Display) --- */
+.mission-timer-hud.leaderboard-hud {
+  /* Repurpose the HUD space for the table */
+  padding: 10px;
+  width: 320px;
+  left: auto; /* Push it to the right */
+  right: 25px; /* Same position as the old live timer */
+  bottom: 25px;
+  display: block;
+}
+
+.leaderboard-hud .hud-log-section {
+  border-bottom: 1px dashed var(--accent-teal);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.leaderboard-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-primary);
+  font-size: 0.8rem;
+}
+
+.leaderboard-mini-table th {
+  color: var(--accent-green);
+  font-family: var(--font-heading);
+  text-align: left;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--folder-border);
+}
+
+.leaderboard-mini-table td {
+  color: #ccc;
+  padding: 4px 0;
+}
+
+.leaderboard-mini-table tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Rank Colors inside table rows */
+.rank-s td:first-child {
+  color: #ffd700;
+  font-weight: bold;
+}
+.rank-a td:first-child {
+  color: #c0c0c0;
+}
+.rank-b td:first-child {
+  color: var(--accent-teal);
+}
+.rank-c td:first-child {
+  color: var(--secondary-red);
+}
+.rank-n {
+  text-align: center;
+  font-style: italic;
+  color: #888;
 }

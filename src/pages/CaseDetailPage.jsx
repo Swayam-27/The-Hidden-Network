@@ -61,7 +61,7 @@ const CountdownModal = ({ count }) => (
   </div>
 );
 
-const CaseDetailPage = ({ playClick, playHover }) => {
+const CaseDetailPage = ({ playClick, playHover, agentName }) => {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const { isInsider } = useAuth();
@@ -99,11 +99,12 @@ const CaseDetailPage = ({ playClick, playHover }) => {
     ? unlockedEpisodes.length === caseInfo.episodes.length && !isCaseComingSoon
     : false;
 
-  // --- CALCULATE TOTAL PUZZLES IN THE CASE ---
   const totalPuzzles = caseInfo
     ? caseInfo.episodes.filter((ep) => ep.puzzle).length +
       (caseInfo.firstPuzzle ? 1 : 0)
     : 0;
+
+  const puzzlesSolvedCount = unlockedEpisodes.length;
 
   useEffect(() => {
     if (!isInsider) navigate("/");
@@ -317,10 +318,6 @@ const CaseDetailPage = ({ playClick, playHover }) => {
   if (countdown !== null) return <CountdownModal count={countdown} />;
 
   const isHighError = totalAttempts > totalPuzzles / 2;
-  const puzzlesSolvedCount =
-    caseInfo.firstPuzzle && unlockedEpisodes.length === 0
-      ? 0
-      : unlockedEpisodes.length + 1;
 
   return (
     <div className="page-container">
@@ -444,6 +441,11 @@ const CaseDetailPage = ({ playClick, playHover }) => {
               totalAttempts={totalAttempts}
               episodeCount={totalPuzzles}
               totalAudioDurationMs={caseInfo.totalAudioDurationMs}
+              // --- NEW PROPS PASSED DOWN ---
+              caseId={caseId}
+              agentName={agentName}
+              playHover={playHover}
+              playClick={playClick}
             />
           )}
         </div>
@@ -472,7 +474,7 @@ const CaseDetailPage = ({ playClick, playHover }) => {
             <div>
               <span className="hud-label">PUZZLES SOLVED:</span>
               <span className="hud-stat-value stat-ok">
-                {unlockedEpisodes.length} / {totalPuzzles}
+                {puzzlesSolvedCount} / {totalPuzzles}
               </span>
             </div>
           </div>

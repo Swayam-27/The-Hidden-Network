@@ -49,9 +49,11 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // --- AGENT STATE ---
   const [agentName, setAgentName] = useState(
     () => localStorage.getItem("agentName") || "AGENT"
   );
+
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
   const hoverSoundRef = useRef(new Audio("/assets/ui-hover.mp3"));
@@ -90,31 +92,31 @@ export default function App() {
   const playHover = useCallback(() => {
     if (!unlockAudio()) return;
     hoverSoundRef.current.currentTime = 0;
-    hoverSoundRef.current.play().catch((e) => {});
+    hoverSoundRef.current.play().catch(() => {});
   }, [unlockAudio]);
 
   const playClick = useCallback(() => {
     if (!unlockAudio()) return;
     clickSoundRef.current.currentTime = 0;
-    clickSoundRef.current.play().catch((e) => {});
+    clickSoundRef.current.play().catch(() => {});
   }, [unlockAudio]);
 
   const playKeypress = useCallback(() => {
     if (!unlockAudio()) return;
     keypressSoundRef.current.currentTime = 0;
-    keypressSoundRef.current.play().catch((e) => {});
+    keypressSoundRef.current.play().catch(() => {});
   }, [unlockAudio]);
 
   const playEnter = useCallback(() => {
     if (!unlockAudio()) return;
     enterSoundRef.current.currentTime = 0;
-    enterSoundRef.current.play().catch((e) => {});
+    enterSoundRef.current.play().catch(() => {});
   }, [unlockAudio]);
 
   const playTypingLoop = useCallback(() => {
     if (!unlockAudio()) return;
     typingLoopRef.current.currentTime = 0;
-    typingLoopRef.current.play().catch((e) => {});
+    typingLoopRef.current.play().catch(() => {});
   }, [unlockAudio]);
 
   const stopTypingLoop = useCallback(() => {
@@ -122,7 +124,8 @@ export default function App() {
     typingLoopRef.current.currentTime = 0;
   }, []);
 
-  const updateAgentName = useCallback((name) => {
+  // --- AGENT REGISTRATION ---
+  const registerAgent = useCallback((name) => {
     const safeName = name.trim().toUpperCase() || "AGENT";
     setAgentName(safeName);
     localStorage.setItem("agentName", safeName);
@@ -183,6 +186,8 @@ export default function App() {
     if (breachTarget) navigate(breachTarget);
   }, [isInsider, login, navigate, breachTarget]);
 
+  const onCasePage = location.pathname.startsWith("/case/");
+
   if (appState === AppState.BREACHING) {
     return <BreachSequence onComplete={handleBreachComplete} {...audioProps} />;
   }
@@ -190,8 +195,6 @@ export default function App() {
   if (appState === AppState.NAVIGATING) {
     return <Loader {...audioProps} />;
   }
-
-  const onCasePage = location.pathname.startsWith("/case/");
 
   return (
     <>
@@ -215,7 +218,7 @@ export default function App() {
                   onPreloaderFinish={handlePreloaderFinish}
                   appState={appState}
                   agentName={agentName}
-                  updateAgentName={updateAgentName}
+                  updateAgentName={registerAgent}
                   {...audioProps}
                 />
               }
@@ -232,7 +235,8 @@ export default function App() {
               path="/case/:caseId"
               element={
                 <ProtectedRoute>
-                  <CaseDetailPage {...audioProps} />
+                  {/* ✅ Passing agentName prop here */}
+                  <CaseDetailPage agentName={agentName} {...audioProps} />
                 </ProtectedRoute>
               }
             />
@@ -247,6 +251,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+
       <Footer {...audioProps} />
     </>
   );
