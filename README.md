@@ -206,3 +206,5 @@ Full progress saved permanently via localStorage:
 ---
 
 ## 🗂️ Project Structure
+<img width="387" height="650" alt="image" src="https://github.com/user-attachments/assets/e6ad3ecd-84b5-4160-906f-af0d21101d2a" />
+
