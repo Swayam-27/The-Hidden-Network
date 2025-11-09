@@ -63,7 +63,6 @@ const MobileHudToggle = ({
     };
   }, [openHud]);
 
-  const onArchivePage = location.pathname === '/cases' || location.pathname === '/about';
   const onCaseDetailPage = location.pathname.startsWith('/case/');
 
   const renderCurrentHud = () => {

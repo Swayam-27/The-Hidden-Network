@@ -63,11 +63,6 @@ export default function App() {
   const [agentName, setAgentName] = useState(
     () => localStorage.getItem("agentName") || null
   );
-  const [agentCipherKey, setAgentCipherKey] = useState(
-    () => localStorage.getItem("agentCipherKey") || null
-  );
-
-
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
   const hoverSoundRef = useRef(new Audio("/assets/ui-hover.mp3"));
@@ -94,6 +89,7 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
 
 
   const unlockAudio = useCallback(() => {
@@ -153,7 +149,6 @@ export default function App() {
     const safeKey = key.trim();
     
     setAgentName(safeName);
-    setAgentCipherKey(safeKey);
     localStorage.setItem("agentName", safeName);
     localStorage.setItem("agentCipherKey", safeKey);
   }, []);

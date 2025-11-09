@@ -292,6 +292,11 @@ const Console = ({
             });
             setInput("");
             return;
+        
+        default: 
+            setLines(prev => [...prev, "> UNEXPECTED SYSTEM STATE. RESETTING..."]);
+            resetAndClearConsole("> SYSTEM ERROR", true);
+            break;
     }
   };
 

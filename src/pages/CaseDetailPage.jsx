@@ -135,32 +135,26 @@ const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMo
     return () => observer.disconnect();
   }, [isLoading]);
 
-
   useEffect(() => {
     if (!setLiveCaseData) return;
 
     setLiveCaseData({
-      isCaseActive: isTimerRunning,
-      caseId: caseId,
-      caseTitle: caseInfo?.title,
-      totalTimeMs: completionTimeMs,
-      totalAttempts: totalAttempts,
-      submissionStatus: submissionStatus,
-      puzzlesSolved: puzzlesSolvedCount,    
-      totalPuzzles: totalPuzzles,           
+        isCaseActive: isTimerRunning,
+        caseId: caseId,
+        caseTitle: caseInfo?.title,
+        totalTimeMs: completionTimeMs,
+        totalAttempts: totalAttempts,
+        submissionStatus: submissionStatus,
     });
   }, [
-    isTimerRunning,
-    caseId,
-    caseInfo,
-    completionTimeMs,
-    totalAttempts,
+    isTimerRunning, 
+    caseId, 
+    caseInfo, 
+    completionTimeMs, 
+    totalAttempts, 
     submissionStatus,
-    puzzlesSolvedCount,                 
-    totalPuzzles,                         
-    setLiveCaseData,
+    setLiveCaseData
   ]);
-
 
 
   useEffect(() => {
@@ -190,7 +184,6 @@ const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMo
       return () => clearTimeout(initialDelay);
     }
   }, [isCaseComingSoon, allEpisodesUnlocked, hasPageInitialized]);
-
 
   useEffect(() => {
     if (
@@ -354,7 +347,7 @@ const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMo
       >
         {isCaseComingSoon && (
           <div className="full-page-coming-soon-overlay">
-            <h2>// FILE IN PREPARATION //</h2>
+            <h2>{/* // FILE IN PREPARATION // */}</h2>
             <p>
               This case file is currently being compiled and encrypted. Full
               debriefing coming soon.
@@ -428,7 +421,7 @@ const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMo
                       [ EPISODE {index + 1} - ENCRYPTED ]
                     </h3>
                     <div className="locked-placeholder">
-                      <p>// DATA REDACTED - AWAITING DECRYPTION KEY //</p>
+                      <p>{/* // DATA REDACTED - AWAITING DECRYPTION KEY // */}</p>
                     </div>
                   </section>
                 );
@@ -506,7 +499,7 @@ const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMo
 
           <div className="hud-message">
             <p>
-              <strong>// OPERATIONAL NOTE //</strong>
+              <strong>{/* // OPERATIONAL NOTE // */}</strong>
             </p>
             <p>
               Cipher is tracking your performance. Efficiency is paramount. Only

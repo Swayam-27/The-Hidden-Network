@@ -4,6 +4,7 @@ import React, {
   Suspense,
   useRef,
   useCallback,
+  useMemo,
 } from "react";
 import Spline from "@splinetool/react-spline";
 import Console from "../components/Console.jsx";
@@ -14,12 +15,16 @@ const Preloader = ({ onFinished, playTypingLoop, stopTypingLoop }) => {
   const [isClosing, setIsClosing] = useState(false);
   const lineIndex = useRef(0);
   const charIndex = useRef(0);
-  const preloaderLines = [
-    "> Initializing connection...",
-    "> Bypassing security protocols... [OK]",
-    "> Decrypting archive... [██████████] 100%",
-    "> ACCESS GRANTED",
-  ];
+
+  const preloaderLines = useMemo(
+    () => [
+      "> Initializing connection...",
+      "> Bypassing security protocols... [OK]",
+      "> Decrypting archive... [██████████] 100%",
+      "> ACCESS GRANTED",
+    ],
+    []
+  );
 
   useEffect(() => {
     playTypingLoop();
@@ -61,7 +66,7 @@ const Preloader = ({ onFinished, playTypingLoop, stopTypingLoop }) => {
       timeouts.forEach(clearTimeout);
       stopTypingLoop();
     };
-  }, [onFinished, playTypingLoop, stopTypingLoop]);
+  }, [onFinished, playTypingLoop, stopTypingLoop, preloaderLines]);
 
   return (
     <div id="preloader" className={isClosing ? "closing" : ""}>
@@ -69,7 +74,7 @@ const Preloader = ({ onFinished, playTypingLoop, stopTypingLoop }) => {
         {lines.map((line, index) => (
           <p key={index}>
             {line}
-            {lineIndex.current === index &&
+            {preloaderLines[index] && lineIndex.current === index &&
               charIndex.current < preloaderLines[index].length && (
                 <span className="typing-cursor"></span>
               )}
@@ -98,7 +103,7 @@ const HomePage = ({ onLogin, onPreloaderFinish, appState, ...audioProps }) => {
       setActiveFragment((prev) => (prev + 1) % fragments.length);
     }, 1500);
     return () => clearInterval(pulseInterval);
-  }, [showPreloader]);
+  }, [showPreloader, fragments.length]);
 
   useEffect(() => {
     if (showPreloader) return;

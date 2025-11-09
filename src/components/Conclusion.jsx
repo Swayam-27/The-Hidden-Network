@@ -67,7 +67,6 @@ const Conclusion = ({
         localStorage.setItem(`case_${normalizedCaseId}_rankClass`, rankClass);
     }
   }, [caseId, rank, rankClass]);
-  // --- END NEW LOGIC ---
 
   const handleSubmission = useCallback(async () => {
     if (submissionStatus !== null || !agentName || !cipherKey) {
@@ -109,7 +108,7 @@ const Conclusion = ({
           setSubmissionStatus("SUCCESS"); 
         }
       } else if (response.status === 403) {
-        const result = await response.json(); 
+        await response.json(); 
         setSubmissionStatus("ALREADY_RECORDED");
       } else {
         const result = await response.json(); 
@@ -134,13 +133,13 @@ const Conclusion = ({
     handleSubmission();
   }, [handleSubmission]);
 
-  const statusMessage = {
-    SUCCESS: "SCORE SUBMITTED. CHECK GLOBAL LEADERBOARD.",
-    ALREADY_RECORDED: "SCORE NOT SUBMITTED: FIRST ATTEMPT ALREADY LOGGED.",
-    FAILED: "TRANSMISSION FAILED. CHECK CONSOLE FOR ERRORS.",
-    "TRANSMITTING...": "TRANSMITTING SCORE TO GLOBAL ARCHIVE...",
-    NOT_LOGGED_IN: "LOCAL SCORE. LOG IN TO SUBMIT TO GLOBAL LEADERBOARD.",
-  };
+  // const statusMessage = {
+  //   SUCCESS: "SCORE SUBMITTED. CHECK GLOBAL LEADERBOARD.",
+  //   ALREADY_RECORDED: "SCORE NOT SUBMITTED: FIRST ATTEMPT ALREADY LOGGED.",
+  //   FAILED: "TRANSMISSION FAILED. CHECK CONSOLE FOR ERRORS.",
+  //   "TRANSMITTING...": "TRANSMITTING SCORE TO GLOBAL ARCHIVE...",
+  //   NOT_LOGGED_IN: "LOCAL SCORE. LOG IN TO SUBMIT TO GLOBAL LEADERBOARD.",
+  // };
 
   return (
     <div className="conclusion-wrapper">
@@ -174,7 +173,6 @@ const Conclusion = ({
           .replace(/_/g, "-")
           .replace(/\.+/g, "")}`}
       >
-        // STATUS: {statusMessage[submissionStatus] || message} //
       </p>
       <p className="conclusion-message">{message}</p>
     </div>
