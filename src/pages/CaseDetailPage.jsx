@@ -61,7 +61,7 @@ const CountdownModal = ({ count }) => (
   </div>
 );
 
-const CaseDetailPage = ({ playClick, playHover, agentName }) => {
+const CaseDetailPage = ({ playClick, playHover, agentName, setLiveCaseData, isMobile }) => {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const { isInsider } = useAuth();
@@ -105,6 +105,8 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
     : 0;
 
   const puzzlesSolvedCount = unlockedEpisodes.length;
+  const isHighError = totalAttempts > totalPuzzles / 2;
+  const submissionStatus = showConclusion ? 'SUBMITTED' : null;
 
   useEffect(() => {
     if (!isInsider) navigate("/");
@@ -133,7 +135,34 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
     return () => observer.disconnect();
   }, [isLoading]);
 
-  // --- PAGE STARTUP LOGIC ---
+
+  useEffect(() => {
+    if (!setLiveCaseData) return;
+
+    setLiveCaseData({
+      isCaseActive: isTimerRunning,
+      caseId: caseId,
+      caseTitle: caseInfo?.title,
+      totalTimeMs: completionTimeMs,
+      totalAttempts: totalAttempts,
+      submissionStatus: submissionStatus,
+      puzzlesSolved: puzzlesSolvedCount,    
+      totalPuzzles: totalPuzzles,           
+    });
+  }, [
+    isTimerRunning,
+    caseId,
+    caseInfo,
+    completionTimeMs,
+    totalAttempts,
+    submissionStatus,
+    puzzlesSolvedCount,                 
+    totalPuzzles,                         
+    setLiveCaseData,
+  ]);
+
+
+
   useEffect(() => {
     if (isCaseComingSoon || allEpisodesUnlocked || hasPageInitialized) return;
 
@@ -162,7 +191,7 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
     }
   }, [isCaseComingSoon, allEpisodesUnlocked, hasPageInitialized]);
 
-  // --- TIMER LOGIC ---
+
   useEffect(() => {
     if (
       isTimerRunning &&
@@ -212,7 +241,6 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
     hasPageInitialized,
   ]);
 
-  // --- LOCALSTORAGE SAVE ---
   useEffect(() => {
     localStorage.setItem(
       `case_${caseId}_progress`,
@@ -316,8 +344,6 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
     );
 
   if (countdown !== null) return <CountdownModal count={countdown} />;
-
-  const isHighError = totalAttempts > totalPuzzles / 2;
 
   return (
     <div className="page-container">
@@ -441,7 +467,6 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
               totalAttempts={totalAttempts}
               episodeCount={totalPuzzles}
               totalAudioDurationMs={caseInfo.totalAudioDurationMs}
-              // --- NEW PROPS PASSED DOWN ---
               caseId={caseId}
               agentName={agentName}
               playHover={playHover}
@@ -451,7 +476,7 @@ const CaseDetailPage = ({ playClick, playHover, agentName }) => {
         </div>
       </main>
 
-      {!allEpisodesUnlocked && !isCaseComingSoon && (
+      {!isMobile && !allEpisodesUnlocked && !isCaseComingSoon && (
         <div className="mission-timer-hud">
           <div className="hud-timer">
             <span className="hud-label">TIME:</span>

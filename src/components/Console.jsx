@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-const RESERVED_NAMES = ["CIPHER", "ADMIN", "ROOT", "HANDLER"]; // New Reserved List
+const RESERVED_NAMES = ["CIPHER", "ADMIN", "ROOT", "HANDLER", "AGENT"];
 
 const Console = ({
   onLogin,
@@ -11,20 +11,61 @@ const Console = ({
   playClick,
   playTypingLoop,
   stopTypingLoop,
-  agentName,
-  updateAgentName,
+  agentName, 
+  registerAgent,
 }) => {
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState("");
   const [inputStage, setInputStage] = useState("TYPING_WELCOME");
   const [shouldScroll, setShouldScroll] = useState(false);
+  const [tempCodename, setTempCodename] = useState("");
   const [tauntVisible, setTauntVisible] = useState(false);
-
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showDelayedButtons, setShowDelayedButtons] = useState(false); 
+  
   const endOfConsoleRef = useRef(null);
   const inputRef = useRef(null);
   const activityTimerRef = useRef(null);
 
-  const TAUNT_DELAY_MS = 30000;
+  const TAUNT_DELAY_MS = 25000; 
+  
+  const resetAndClearConsole = useCallback((message, goHome = true) => {
+    setLines(prev => [...prev, message]);
+    
+    setTimeout(() => {
+        setLines([]);
+        setTempCodename('');
+        if (goHome) {
+            setRestartConsole(prev => prev + 1); 
+        } else {
+            setInputStage("AWAITING_COMMAND");
+            setShowDelayedButtons(false);
+        }
+    }, 2000); 
+  }, []);
+
+  const handleAuthRequest = async (name, key, action) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`/.netlify/functions/agent-auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentName: name, cipherKey: key, action }),
+      });
+      
+      const body = await response.json();
+      setIsProcessing(false);
+
+      if (response.status === 200) {
+        return { success: true, message: body.message || "LOGIN SUCCESSFUL." };
+      } else {
+        return { success: false, message: body.message || "Authentication Failed." };
+      }
+    } catch (error) {
+      setIsProcessing(false);
+      return { success: false, message: "NETWORK ERROR. Cannot reach server." };
+    }
+  };
 
   const resetActivityTimer = useCallback(() => {
     if (activityTimerRef.current) {
@@ -36,71 +77,62 @@ const Console = ({
       activityTimerRef.current = setTimeout(() => {
         setLines((prev) => [
           ...prev,
-          `[CIPHER]: Agent [${agentName}], it seems following and reading rules is too complex for you. Use the button given below.`,
+          `[CIPHER]: Agent [${agentName || 'Recruit'}], it seems following and reading rules is too complex for you. Use the button given below.`,
         ]);
         setTauntVisible(true);
+        setShowDelayedButtons(true);
       }, TAUNT_DELAY_MS);
+    } else {
+        setShowDelayedButtons(false);
     }
   }, [inputStage, agentName]);
 
   useEffect(() => {
     resetActivityTimer();
     return () => {
-      if (activityTimerRef.current) {
-        clearTimeout(activityTimerRef.current);
-      }
+      if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
     };
   }, [inputStage, resetActivityTimer]);
 
   const handleContainerClick = () => {
     inputRef.current?.focus();
-    resetActivityTimer();
   };
+  
+
+  const [restartConsole, setRestartConsole] = useState(0); 
+  
 
   useEffect(() => {
-    // ... (Existing useEffect for welcome message remains here) ...
-    if (!startTyping) return;
+    if (!startTyping && restartConsole === 0) return; 
+
+    setInputStage("TYPING_WELCOME"); 
     setShouldScroll(true);
 
-    const welcomeShown = localStorage.getItem("welcomeMessageShown") === "true";
-    const nameRegistered = localStorage.getItem("agentName") !== null;
+    const storedAgentName = localStorage.getItem("agentName");
 
-    if (welcomeShown && nameRegistered) {
-      setLines([`WELCOME BACK, AGENT [${agentName}]. Type HELP for commands.`]);
-      setInputStage("AWAITING_COMMAND");
+    if (storedAgentName && restartConsole === 0) {
+      setTempCodename(storedAgentName); 
+      setLines([
+        `> WELCOME BACK, AGENT [${storedAgentName}]. Please verify your identity.`,
+        `> ENTER YOUR 4-CHARACTER CIPHER KEY:`,
+      ]);
+      setInputStage("LOGIN_KEY"); 
       return;
     }
 
     if (playTypingLoop) playTypingLoop();
-    const timestamp = new Date();
-    const sessionId = Math.random().toString(16).slice(2, 10).toUpperCase();
     const welcomeMessage = [
-      `[SESSION ID: ${sessionId}]`,
-      `[TIMESTAMP: ${timestamp.toISOString()}]`,
-      "",
-      "System online.",
+      "> System online.",
+      "> Are you a NEW AGENT or an EXISTING AGENT?",
     ];
-
-    if (!nameRegistered) {
-      welcomeMessage.push(
-        "WELCOME. HOW SHOULD CIPHER REFER TO YOU? (Codename, Max 12 chars):"
-      );
-      setInputStage("AWAITING_NAME");
-    } else {
-      welcomeMessage.push(
-        `Welcome back, AGENT [${agentName}]. Awaiting input.`
-      );
-      setInputStage("AWAITING_COMMAND");
-    }
 
     let lineIndex = 0;
     let charIndex = 0;
     const timeouts = [];
     const type = () => {
       if (lineIndex >= welcomeMessage.length) {
-        localStorage.setItem("welcomeMessageShown", "true");
         if (stopTypingLoop) stopTypingLoop();
-        resetActivityTimer();
+        setInputStage("CHOOSE_PATH");
         return;
       }
       if (charIndex === 0) setLines((prev) => [...prev, ""]);
@@ -108,7 +140,7 @@ const Console = ({
       if (charIndex < currentLineText.length) {
         setLines((prev) => {
           const newLines = [...prev];
-          newLines[lineIndex] = currentLineText.substring(0, charIndex + 1);
+          newLines[newLines.length - 1] = currentLineText.substring(0, charIndex + 1);
           return newLines;
         });
         charIndex++;
@@ -123,15 +155,8 @@ const Console = ({
     return () => {
       timeouts.forEach(clearTimeout);
       if (stopTypingLoop) stopTypingLoop();
-      if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
     };
-  }, [
-    startTyping,
-    playTypingLoop,
-    stopTypingLoop,
-    agentName,
-    resetActivityTimer,
-  ]);
+  }, [startTyping, playTypingLoop, stopTypingLoop, restartConsole]); 
 
   useEffect(() => {
     if (shouldScroll) {
@@ -139,100 +164,159 @@ const Console = ({
     }
   }, [lines, shouldScroll]);
 
+
   const executeCommand = (commandString, isButton = false) => {
     if (playEnter) playEnter();
     setTauntVisible(false);
+    setShowDelayedButtons(false);
 
-    if (inputStage === "AWAITING_NAME") {
-      const newName = (isButton ? commandString : input)
-        .trim()
-        .substring(0, 12)
-        .toUpperCase();
+    const currentInput = commandString;
+    const currentInputUpper = currentInput.trim().toUpperCase();
+    const currentAgentName = agentName || tempCodename;
 
-      if (newName.length < 3) {
-        setLines([
-          ...lines,
-          `C:\\Users\\Agent>${newName}`,
-          "  > CODENAME TOO SHORT (MIN 3 CHARS). TRY AGAIN.",
-        ]);
-        setInput("");
-        return;
-      }
+    if (inputStage === "AWAITING_COMMAND") {
+        const command = currentInput.toLowerCase().trim();
+        const args = command.split(" ");
+        const baseCommand = args[0];
+        const newLines = [...lines, `C:\\Users\\${currentAgentName}>${currentInput}`];
 
-      // --- RESERVED NAME CHECK ---
-      if (RESERVED_NAMES.includes(newName)) {
-        setLines([
-          ...lines,
-          `C:\\Users\\Agent>${newName}`,
-          "  > ACCESS DENIED. CODENAME RESERVED FOR CIPHER PROTOCOLS.",
-        ]);
-        setInput("");
-        return;
-      }
-
-      updateAgentName(newName);
-
-      setLines([
-        ...lines,
-        `C:\\Users\\Agent>${newName}`,
-        `  > CODENAME [${newName}] SAVED.`,
-        `WELCOME, AGENT [${newName}]. Type HELP for commands.`,
-      ]);
-      setInput("");
-      setInputStage("AWAITING_COMMAND");
-      resetActivityTimer();
-      return;
-    }
-
-    const command = (isButton ? commandString : input).toLowerCase().trim();
-    const args = command.split(" ");
-    const baseCommand = args[0];
-    const newLines = [...lines, `C:\\Users\\${agentName}>${commandString}`];
-
-    switch (baseCommand) {
-      case "goto":
-        if (args[1] === "cases" || args[1] === "about") {
-          onLogin(`/${args[1]}`);
-        } else {
-          newLines.push(`  '${commandString}' is not a valid GOTO command.`);
+        switch (baseCommand) {
+            case "goto":
+                if (args[1] === "cases" || args[1] === "about") {
+                    onLogin(`/${args[1]}`);
+                } else {
+                    newLines.push(`> '${currentInput}' is not a valid GOTO command.`);
+                }
+                break;
+            case "help":
+                newLines.push(
+                    `> [AVAILABLE COMMANDS]`,
+                    `>   GOTO CASES      - Takes you to the cases section`,
+                    `>   GOTO ABOUT      - Takes you to the about section`,
+                    `>   WHOAMI          - Displays your Agent details.`
+                );
+                break;
+            case "whoami":
+                newLines.push(`> Designation: [${currentAgentName}]. Status: Agent.`);
+                break;
+            case "cipher":
+                newLines.push("> The Librarian of this archive.");
+                break;
+            case "clear":
+                setLines([""]);
+                setInput("");
+                return;
+            default:
+                newLines.push(
+                    `> COMMAND NOT RECOGNIZED. TYPE [HELP] FOR A LIST OF COMMANDS.`
+                );
+                break;
         }
-        break;
-      case "help":
-        newLines.push(
-          "  [AVAILABLE COMMANDS]",
-          "  GOTO CASES      - Takes you to the cases section",
-          "  GOTO ABOUT      - Takes you to the about section",
-          "  WHOAMI          - Displays your Agent details."
-        );
-        break;
-      case "whoami":
-        newLines.push(`  > Designation: [${agentName}]. Status: Agent.`);
-        break;
-      case "cipher":
-        newLines.push("  > The Librarian of this archive.");
-        break;
-      case "clear":
-        setLines([""]);
+        setLines(newLines);
+        setInput("");
+        resetActivityTimer();
         return;
-      default:
-        newLines.push(
-          `  > COMMAND NOT RECOGNIZED. TYPE [HELP] FOR A LIST OF COMMANDS.`
-        );
-        break;
     }
-    setLines(newLines);
-    setInput("");
-    resetActivityTimer();
+    
+    switch(inputStage) {
+        case "REGISTER_NAME":
+            if (currentInputUpper.length < 3 || currentInputUpper.length > 12) {
+                setLines(prev => [...prev, `CODENAME:>${currentInput}`, "> CODENAME MUST BE 3-12 CHARACTERS."]);
+                setInput("");
+                return;
+            }
+            if (RESERVED_NAMES.includes(currentInputUpper)) {
+                setLines(prev => [...prev, `CODENAME:>${currentInput}`, "> ACCESS DENIED. CODENAME IS RESERVED."]);
+                setInput("");
+                return;
+            }
+            setTempCodename(currentInputUpper);
+            setLines(prev => [...prev, `CODENAME:>${currentInput}`, "> ASSIGN A 4-CHARACTER CIPHER KEY:"]);
+            setInputStage("REGISTER_KEY");
+            setInput("");
+            return;
+
+        case "REGISTER_KEY":
+            if (currentInput.length !== 4) {
+                setLines(prev => [...prev, `ASSIGN KEY:>${'*'.repeat(currentInput.length)}`, "> CIPHER KEY MUST BE 4 CHARACTERS."]);
+                setInput("");
+                return;
+            }
+            handleAuthRequest(tempCodename, currentInput, 'register').then(result => {
+                setLines(prev => [...prev, `ASSIGN KEY:>${'*'.repeat(currentInput.length)}`]);
+                if(result.success) {
+                    registerAgent(tempCodename, currentInput); 
+                    
+                    setTimeout(() => {
+                      setLines([
+                          `> AUTH SUCCESS: ${result.message}`,
+                          `> WELCOME, AGENT [${tempCodename}]. You have Successfully registered`,
+                          `> Type HELP for available commands`,
+                          ``
+                      ]);
+                      setInputStage("AWAITING_COMMAND"); 
+                      setShowDelayedButtons(false);
+                      resetActivityTimer();
+                    }, 500);
+
+                } else {
+
+                    resetAndClearConsole(`> AUTH ERROR: ${result.message}`);
+                }
+            });
+            setInput("");
+            return;
+            
+        case "LOGIN_NAME":
+            setTempCodename(currentInputUpper);
+            setLines(prev => [...prev, `CODENAME:>${currentInput}`, "> ENTER YOUR 4-CHARACTER CIPHER KEY:"]);
+            setInputStage("LOGIN_KEY");
+            setInput("");
+            return;
+
+        case "LOGIN_KEY":
+            if (currentInput.length !== 4) {
+                setLines(prev => [...prev, `CIPHER KEY:>${'*'.repeat(currentInput.length)}`, "> CIPHER KEY MUST BE 4 CHARACTERS."]);
+                setInput("");
+                return;
+            }
+            handleAuthRequest(tempCodename, currentInput, 'login').then(result => {
+                setLines(prev => [...prev, `CIPHER KEY:>${'*'.repeat(currentInput.length)}`]);
+                if(result.success) {
+                    registerAgent(tempCodename, currentInput); 
+                    setLines(prev => [...prev, `> AUTH SUCCESS: ${result.message}`, `> AGENT [${tempCodename}] VERIFIED. BREACHING NETWORK...`]);
+                    onLogin('/cases'); 
+                } else {
+                    resetAndClearConsole(`> AUTH ERROR: ${result.message}`);
+                }
+            });
+            setInput("");
+            return;
+    }
   };
 
   const handleManualCommand = (e) => {
-    e.preventDefault();
-    executeCommand(input);
+    if (e) e.preventDefault(); 
+    if (isProcessing) return;
+    if (playEnter) playEnter();
+    executeCommand(input, false);
   };
 
-  const handleButtonClick = (command) => {
+  const handleButtonClick = (command, choiceType = null) => {
     if (playClick) playClick();
-    executeCommand(command, true);
+    if (isProcessing) return;
+    
+    if (choiceType === 'path') {
+        if(command === 'NEW') {
+            setLines(prev => [...prev, "> SELECTED: [NEW AGENT]", "> PLEASE REGISTER YOUR AGENT CODENAME (3-12 chars):"]);
+            setInputStage("REGISTER_NAME");
+        } else {
+            setLines(prev => [...prev, "> SELECTED: [EXISTING AGENT]", "> ENTER YOUR AGENT CODENAME:"]);
+            setInputStage("LOGIN_NAME");
+        }
+    } else {
+        executeCommand(command, true); 
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -242,10 +326,14 @@ const Console = ({
     resetActivityTimer();
   };
 
-  const isCommandReady =
-    inputStage === "AWAITING_COMMAND" || inputStage === "AWAITING_NAME";
-  const inputPrompt =
-    inputStage === "AWAITING_NAME" ? "CODENAME:" : `C:\\Users\\${agentName}>`;
+  const isInputActive = inputStage !== "TYPING_WELCOME" && inputStage !== "CHOOSE_PATH";
+  const currentAgentName = agentName || tempCodename;
+  const inputPrompt = (inputStage === "REGISTER_NAME" || inputStage === "LOGIN_NAME") ? "CODENAME:" : 
+                      (inputStage === "REGISTER_KEY" || inputStage === "LOGIN_KEY") ? "CIPHER KEY:" : 
+                      `C:\\Users\\${currentAgentName}>`;
+  
+  const inputType = (inputStage === "REGISTER_KEY" || inputStage === "LOGIN_KEY") ? "password" : "text";
+  const maxLength = (inputStage === "REGISTER_KEY" || inputStage === "LOGIN_KEY") ? 4 : 12;
 
   return (
     <div className="console-wrapper">
@@ -261,33 +349,57 @@ const Console = ({
             <p
               key={index}
               className={
-                tauntVisible && index === lines.length - 1 ? "taunt-line" : ""
+                inputStage === "AWAITING_COMMAND" && tauntVisible && index === lines.length - 1 ? "taunt-line" : ""
               }
             >
               {line}
             </p>
           ))}
+          
+          {isInputActive && (
+            <form onSubmit={handleManualCommand} className="console-input-line">
+              <span>{inputPrompt}</span>
+              <input
+                id="console-input"
+                ref={inputRef}
+                type={inputType}
+                maxLength={maxLength}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+                autoFocus={isInputActive}
+                disabled={isProcessing}
+              />
+            </form>
+          )}
+
           <div ref={endOfConsoleRef} />
         </div>
-
-        {isCommandReady && (
-          <form onSubmit={handleManualCommand} className="console-input-line">
-            <span>{inputPrompt}</span>
-            <input
-              id="console-input"
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoComplete="off"
-              autoFocus={isCommandReady}
-            />
-          </form>
-        )}
       </div>
 
-      {tauntVisible && inputStage === "AWAITING_COMMAND" && (
+      {inputStage === "CHOOSE_PATH" && (
+        <div className="console-action-buttons login-choice">
+          <button 
+            className="action-button cursor-target new-agent" 
+            onClick={() => handleButtonClick('NEW', 'path')}
+            onMouseEnter={playHover}
+            disabled={isProcessing}
+          >
+            [ NEW AGENT ]
+          </button>
+          <button 
+            className="action-button cursor-target existing-agent" 
+            onClick={() => handleButtonClick('EXISTING', 'path')}
+            onMouseEnter={playHover}
+            disabled={isProcessing}
+          >
+            [ EXISTING AGENT ]
+          </button>
+        </div>
+      )}
+
+      {inputStage === "AWAITING_COMMAND" && showDelayedButtons && (
         <div className="console-action-buttons">
           <button
             className="action-button cursor-target"

@@ -3,21 +3,6 @@ import { caseData } from "../caseData";
 
 const allCaseIds = Object.keys(caseData);
 
-// === HELPER FUNCTIONS (unchanged) ===
-const getRank = (attempts, puzzles, timeMs) => {
-  if (timeMs === 0 || puzzles === 0)
-    return { rank: "N/A", rankClass: "rank-n" };
-
-  const avgTimeMin = timeMs / 1000 / 60 / puzzles;
-  const errorPercentage = puzzles > 0 ? attempts / puzzles : 0;
-
-  if (attempts === 0 && avgTimeMin < 1.5)
-    return { rank: "S-CLASS", rankClass: "rank-s" };
-  if (errorPercentage < 0.5 && avgTimeMin < 3)
-    return { rank: "A-CLASS", rankClass: "rank-a" };
-  if (avgTimeMin < 5) return { rank: "B-CLASS", rankClass: "rank-b" };
-  return { rank: "C-CLASS", rankClass: "rank-c" };
-};
 
 const loadAllCaseData = () => {
   return allCaseIds.map((id) => {
@@ -33,7 +18,7 @@ const loadAllCaseData = () => {
         .map((s) => s[0])
         .join("")
         .toUpperCase()
-        .slice(0, 4), // PR, CA, PP, STUX
+        .slice(0, 4), 
       rank: "N/A",
       rankClass: "rank-n",
       attempts: "N/A",
@@ -48,15 +33,18 @@ const loadAllCaseData = () => {
         localStorage.getItem(`case_${id}_attempts`) || 0,
         10
       );
+      
+      const savedRank = localStorage.getItem(`case_${id}_rank`);
+      const savedRankClass = localStorage.getItem(`case_${id}_rankClass`);
+      
       const puzzleCount =
         caseInfo.episodes.filter((ep) => ep.puzzle).length +
         (caseInfo.firstPuzzle ? 1 : 0);
-      const { rank, rankClass } = getRank(attempts, puzzleCount, time);
 
       stats = {
         ...stats,
-        rank,
-        rankClass,
+        rank: savedRank || "N/A",
+        rankClass: savedRankClass || "rank-n",
         attempts,
         avgTime:
           puzzleCount > 0 ? (time / 1000 / 60 / puzzleCount).toFixed(1) : "N/A",
@@ -68,10 +56,8 @@ const loadAllCaseData = () => {
 
 const MissionLog = ({ agentName }) => {
   const [allCasesData, setAllCasesData] = useState([]);
-  // State to track which case's stats are currently open/visible
   const [openCaseId, setOpenCaseId] = useState(null);
 
-  // Load and synchronize data
   useEffect(() => {
     const updateLog = () => {
       setAllCasesData(loadAllCaseData());
@@ -88,17 +74,12 @@ const MissionLog = ({ agentName }) => {
     };
   }, []);
 
-  // Toggle function
   const handleCaseClick = (id) => {
-    // If the clicked case is already open, close it. Otherwise, open it.
     setOpenCaseId(openCaseId === id ? null : id);
   };
 
-  // Find the stats for the currently open case to display below
-  const activeStats = allCasesData.find((c) => c.id === openCaseId);
-
   return (
-    <div className="mission-log-hud">
+    <div className="mission-log-hud"> 
       <div className="hud-agent-status">
         AGENT: <strong>{agentName}</strong>
       </div>
@@ -106,7 +87,6 @@ const MissionLog = ({ agentName }) => {
       <div className="case-log-container">
         {allCasesData.map((caseStats) => (
           <React.Fragment key={caseStats.id}>
-            {/* --- 1. THE CASE BUTTON (Always Visible) --- */}
             <div
               className={`case-log-item cursor-target ${
                 openCaseId === caseStats.id ? "active" : ""
@@ -118,8 +98,6 @@ const MissionLog = ({ agentName }) => {
                 {caseStats.isPending ? "FILE" : "▼"}
               </span>
             </div>
-
-            {/* --- 2. THE STATS DROPDOWN (Visible on Click) --- */}
             {openCaseId === caseStats.id && (
               <div className="case-stats-dropdown">
                 {caseStats.isPending ? (
@@ -127,7 +105,6 @@ const MissionLog = ({ agentName }) => {
                     File in preparation. No data available.
                   </p>
                 ) : caseStats.isCompleted ? (
-                  // Display detailed stats for completed cases
                   <>
                     <span className="log-stat-line">
                       Rank:{" "}
@@ -150,7 +127,6 @@ const MissionLog = ({ agentName }) => {
                     </span>
                   </>
                 ) : (
-                  // Display message for unsolved cases
                   <p className="log-status-message rank-n">
                     Case unsolved. No metrics recorded.
                   </p>

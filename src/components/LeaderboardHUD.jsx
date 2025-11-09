@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -15,93 +15,181 @@ const formatTime = (ms) => {
     .padStart(2, "0")}`;
 };
 
-const LeaderboardHUD = ({ caseId, caseTitle }) => {
+const LeaderboardHUD = ({ caseId, caseTitle, submissionStatus }) => {
   const [topScores, setTopScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showNewRecord, setShowNewRecord] = useState(false);
+  const [newRecordName, setNewRecordName] = useState("");
+  const [currentUserName, setCurrentUserName] = useState(null);
 
   useEffect(() => {
-    const fetchTopScores = async () => {
-      setLoading(true);
-      setError(null);
+    const storedName = localStorage.getItem("agent_name");
+    if (storedName) setCurrentUserName(storedName);
+  }, []);
 
-      // 1. Fetch scores for the specific case, ordered by fastest time (ascending)
+  const fetchTopScores = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const normalizedCaseId = (caseId || "").trim().toLowerCase();
+
+    if (!normalizedCaseId) {
+      setLoading(false);
+      setError(true);
+      return;
+    }
+
+    try {
       const { data, error } = await supabase
         .from("global_scores")
         .select("agent_name, rank_class, time_ms")
-        .eq("case_id", caseId)
+        .eq("case_id", normalizedCaseId)
         .order("time_ms", { ascending: true })
         .limit(10);
 
       if (error) {
-        console.error("Leaderboard Fetch Error:", error);
         setError(true);
       } else {
-        setTopScores(data || []);
+        const scores = data || [];
+        
+        if (scores.length > 0) {
+          const storageKey = `lastBest_${normalizedCaseId}`;
+          const lastBest = localStorage.getItem(storageKey);
+          
+          if (lastBest && scores[0].time_ms < parseInt(lastBest)) {
+            setNewRecordName(scores[0].agent_name);
+            setShowNewRecord(true);
+            setTimeout(() => setShowNewRecord(false), 4000);
+          }
+          
+          localStorage.setItem(storageKey, scores[0].time_ms.toString());
+        }
+        
+        setTopScores(scores);
       }
-      setLoading(false);
-    };
-
-    if (caseId) {
-      fetchTopScores();
+    } catch (err) {
+      setError(true);
     }
+    setLoading(false);
   }, [caseId]);
+
+  useEffect(() => {
+    fetchTopScores();
+  }, [fetchTopScores, submissionStatus]);
 
   if (loading) {
     return (
-      <div className="mission-timer-hud leaderboard-hud">
-        <p className="hud-label rank-n">FETCHING GLOBAL RANKINGS...</p>
+      <div className="leaderboard-hud-container">
+        <div className="leaderboard-hud-fixed">
+          <div className="hud-header-minimal">
+            <h3>GLOBAL BEST (PROJECT RAVEN)</h3>
+          </div>
+          <div className="hud-loading-minimal">⟳ LOADING...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="mission-timer-hud leaderboard-hud">
-        <p className="hud-label stat-error">DATABASE CONNECTION FAILED.</p>
+      <div className="leaderboard-hud-container">
+        <div className="leaderboard-hud-fixed">
+          <div className="hud-header-minimal">
+            <h3>GLOBAL BEST (PROJECT RAVEN)</h3>
+          </div>
+          <div className="hud-error-minimal">⚠ CONNECTION FAILED</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mission-timer-hud leaderboard-hud">
-      <div className="hud-log-section leaderboard-header">
-        <span className="hud-label">
-          GLOBAL BEST ({caseTitle.toUpperCase()})
-        </span>
-      </div>
+    <>
+      {showNewRecord && (
+        <div className="new-record-toast">
+          ⚡ NEW RECORD: {newRecordName}
+        </div>
+      )}
 
-      <table className="leaderboard-mini-table">
-        <thead>
-          <tr>
-            <th>RANK</th>
-            <th>AGENT</th>
-            <th>TIME</th>
-          </tr>
-        </thead>
-        <tbody>
-          {topScores.map((score, index) => (
-            <tr
-              key={index}
-              className={`rank-${score.rank_class
-                .toLowerCase()
-                .replace("-", "")}`}
-            >
-              <td>#{index + 1}</td>
-              <td>{score.agent_name}</td>
-              <td>{formatTime(score.time_ms)}</td>
-            </tr>
-          ))}
-          {topScores.length === 0 && (
-            <tr>
-              <td colSpan="3" className="rank-n">
-                NO SCORES RECORDED YET. BE THE FIRST.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+      <div className="leaderboard-hud-container">
+        <div className="leaderboard-hud-fixed">
+          <div className="hud-header-minimal">
+            <h3>GLOBAL BEST ({caseTitle})</h3>
+          </div>
+
+          <table className="leaderboard-table-minimal">
+            <thead>
+              <tr>
+                <th>RANK</th>
+                <th>AGENT</th>
+                <th>CLASS</th>
+                <th>TIME</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topScores.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="no-data-minimal">
+                    NO SCORES YET
+                  </td>
+                </tr>
+              ) : (
+                (() => {
+                  let lastRankClass = null;
+                  return topScores.map((score, index) => {
+                    const isFirst = index === 0;
+                    const isCurrentUser =
+                      currentUserName &&
+                      score.agent_name.toLowerCase() === currentUserName.toLowerCase();
+                    
+                    const currentRankClass = score.rank_class?.charAt(0)?.toUpperCase() || "C";
+                    const showDivider = lastRankClass && lastRankClass !== currentRankClass;
+                    lastRankClass = currentRankClass;
+
+                    return (
+                      <React.Fragment key={`${score.agent_name}-${index}`}>
+                        {showDivider && (
+                          <tr className="divider-row">
+                            <td colSpan="4">
+                              <div className="rank-divider-minimal">
+                                ━━ {currentRankClass}-CLASS ━━
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+
+                        <tr
+                          className={`
+                            ${isFirst ? "first-place" : ""} 
+                            ${isCurrentUser ? "current-user-row" : ""}
+                          `}
+                        >
+                          <td className="rank-col">
+                            {isFirst && <span className="crown-icon">👑</span>}
+                            #{index + 1}
+                          </td>
+                          <td className="agent-col">{score.agent_name}</td>
+                          <td className="class-col">
+                            <span className={`class-badge class-${currentRankClass.toLowerCase()}`}>
+                              {score.rank_class || "C-CLASS"}
+                            </span>
+                          </td>
+                          <td className="time-col">{formatTime(score.time_ms)}</td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  });
+                })()
+              )}
+            </tbody>
+          </table>
+
+          <div className="hud-footer-minimal">
+            [LAST SYNC: {new Date().toLocaleTimeString()}]
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

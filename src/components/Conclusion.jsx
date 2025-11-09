@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import LeaderboardHUD from "./LeaderboardHUD";
 import { caseData } from "../caseData";
 
@@ -41,89 +41,6 @@ const calculateRank = (
   return { rank: "C-CLASS", title: "RECRUIT", rankClass: "rank-c" };
 };
 
-const SubmissionModal = ({
-  agentName,
-  onFinalSubmit,
-  onCancel,
-  playHover,
-  playClick,
-}) => {
-  const [cipherKey, setCipherKey] = useState("");
-  const [feedback, setFeedback] = useState("ENTER 4-DIGIT KEY TO SUBMIT.");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shake, setShake] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-
-    const key = cipherKey.trim();
-    if (key.length !== 4) {
-      setFeedback("KEY MUST BE 4 CHARACTERS.");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setFeedback("TRANSMITTING SCORE...");
-
-    // Pass the key and the local feedback setter to the parent
-    await onFinalSubmit(key, setFeedback);
-    setIsSubmitting(false);
-  };
-
-  return (
-    <div className="modal-overlay">
-      <form
-        onSubmit={handleSubmit}
-        className={`submission-modal ${shake ? "shake" : ""}`}
-      >
-        <h3 className="modal-header">SECURE SCORE TRANSMISSION</h3>
-        <p className="modal-text">
-          Agent {agentName}, verify your identity to post your **first-attempt**
-          score. If this is a new device, your key is required for
-          authentication.
-        </p>
-
-        <div className="input-group">
-          <label htmlFor="cipher-key-input">4-DIGIT CIPHER KEY:</label>
-          <input
-            id="cipher-key-input"
-            type="password"
-            maxLength={4}
-            value={cipherKey}
-            onChange={(e) => setCipherKey(e.target.value.toUpperCase())}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="modal-actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="decrypt-button cursor-target cancel-button"
-            onMouseEnter={playHover}
-            disabled={isSubmitting}
-          >
-            CANCEL
-          </button>
-          <button
-            type="submit"
-            className="decrypt-button cursor-target submit-button"
-            onMouseEnter={playHover}
-            onClick={playClick}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "TRANSMITTING..." : "VERIFY & SUBMIT"}
-          </button>
-        </div>
-        {feedback && <p className={`modal-feedback`}>{feedback}</p>}
-      </form>
-    </div>
-  );
-};
-
 const Conclusion = ({
   message,
   totalTimeMs,
@@ -132,11 +49,9 @@ const Conclusion = ({
   totalAudioDurationMs,
   caseId,
   agentName,
-  playHover,
-  playClick,
 }) => {
-  const [showModal, setShowModal] = useState(true);
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const cipherKey = localStorage.getItem("agentCipherKey");
 
   const { rank, title, rankClass } = calculateRank(
     totalTimeMs,
@@ -145,10 +60,33 @@ const Conclusion = ({
     totalAudioDurationMs || 0
   );
 
-  const handleSubmission = async (cipherKey, setModalFeedback) => {
+  useEffect(() => {
+    const normalizedCaseId = caseId?.toString().trim().toLowerCase().replace(/\s+/g, "-");
+    if (localStorage.getItem(`case_${normalizedCaseId}_completed`) === "true") {
+        localStorage.setItem(`case_${normalizedCaseId}_rank`, rank);
+        localStorage.setItem(`case_${normalizedCaseId}_rankClass`, rankClass);
+    }
+  }, [caseId, rank, rankClass]);
+  // --- END NEW LOGIC ---
+
+  const handleSubmission = useCallback(async () => {
+    if (submissionStatus !== null || !agentName || !cipherKey) {
+      if (!agentName || !cipherKey) {
+        setSubmissionStatus("NOT_LOGGED_IN");
+      }
+      return;
+    }
+    setSubmissionStatus("TRANSMITTING...");
+
+    const normalizedCaseId = caseId
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+
     const payload = {
       agentName,
-      caseId,
+      caseId: normalizedCaseId,
       totalTimeMs,
       totalAttempts,
       rankClass: rank,
@@ -162,44 +100,46 @@ const Conclusion = ({
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-
       if (response.status === 200) {
-        setSubmissionStatus("SUCCESS");
-        setModalFeedback(`Score submitted. Rank: ${rank}.`);
+        try {
+          await response.json(); 
+          setSubmissionStatus("SUCCESS");
+        } catch (jsonError) {
+          console.warn("Successful submission, but JSON response was unreadable.", jsonError);
+          setSubmissionStatus("SUCCESS"); 
+        }
       } else if (response.status === 403) {
+        const result = await response.json(); 
         setSubmissionStatus("ALREADY_RECORDED");
-        setModalFeedback("ALREADY LOGGED. First attempt locked.");
       } else {
+        const result = await response.json(); 
         setSubmissionStatus("FAILED");
-        setModalFeedback(
-          `FAILED: ${result.body || result.message || "Server Error"}`
-        );
         console.error("API Submission Error:", response.status, result.message);
       }
     } catch (error) {
       setSubmissionStatus("FAILED");
-      setModalFeedback("FAILED: NETWORK ERROR.");
       console.error("Network Error during submission:", error);
     }
-  };
+  }, [
+    agentName,
+    caseId,
+    totalTimeMs,
+    totalAttempts,
+    rank,
+    cipherKey,
+    submissionStatus,
+  ]);
 
-  if (showModal && submissionStatus === null) {
-    return (
-      <SubmissionModal
-        agentName={agentName}
-        onFinalSubmit={handleSubmission}
-        onCancel={() => setShowModal(false)}
-        playHover={playHover}
-        playClick={playClick}
-      />
-    );
-  }
+  useEffect(() => {
+    handleSubmission();
+  }, [handleSubmission]);
 
   const statusMessage = {
     SUCCESS: "SCORE SUBMITTED. CHECK GLOBAL LEADERBOARD.",
     ALREADY_RECORDED: "SCORE NOT SUBMITTED: FIRST ATTEMPT ALREADY LOGGED.",
     FAILED: "TRANSMISSION FAILED. CHECK CONSOLE FOR ERRORS.",
+    "TRANSMITTING...": "TRANSMITTING SCORE TO GLOBAL ARCHIVE...",
+    NOT_LOGGED_IN: "LOCAL SCORE. LOG IN TO SUBMIT TO GLOBAL LEADERBOARD.",
   };
 
   return (
@@ -218,15 +158,22 @@ const Conclusion = ({
         </div>
       </div>
 
-      {/* --- RENDER LEADERBOARD HUD HERE --- */}
       {submissionStatus !== null && (
         <LeaderboardHUD
           caseId={caseId}
           caseTitle={caseData[caseId]?.title || "Unknown Mission"}
+          submissionStatus={submissionStatus} 
         />
       )}
 
-      <p className="submission-status-note status-bar">
+      <p
+        className={`submission-status-note status-bar status-${(
+          submissionStatus || "not_logged_in"
+        )
+          .toLowerCase()
+          .replace(/_/g, "-")
+          .replace(/\.+/g, "")}`}
+      >
         // STATUS: {statusMessage[submissionStatus] || message} //
       </p>
       <p className="conclusion-message">{message}</p>

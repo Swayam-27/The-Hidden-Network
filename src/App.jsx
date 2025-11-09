@@ -20,6 +20,7 @@ import Loader from "./components/Loader";
 import BreachSequence from "./components/BreachSequence";
 import TargetCursor from "./components/Cursor";
 import MissionLog from "./components/MissionLog";
+import MobileHudToggle from "./components/MobileHudToggle"; 
 
 const HomePage = React.lazy(() => import("./pages/HomePage"));
 const CasesPage = React.lazy(() => import("./pages/CasesPage"));
@@ -49,10 +50,23 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // --- AGENT STATE ---
+  const [isMobile, setIsMobile] = useState(false);
+  const [liveCaseData, setLiveCaseData] = useState({
+    isCaseActive: false,
+    caseId: null,
+    caseTitle: null,
+    totalTimeMs: 0,
+    totalAttempts: 0,
+    submissionStatus: null,
+  });
+
   const [agentName, setAgentName] = useState(
-    () => localStorage.getItem("agentName") || "AGENT"
+    () => localStorage.getItem("agentName") || null
   );
+  const [agentCipherKey, setAgentCipherKey] = useState(
+    () => localStorage.getItem("agentCipherKey") || null
+  );
+
 
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
@@ -71,6 +85,16 @@ export default function App() {
     keypressSoundRef.current.volume = 0.4;
     enterSoundRef.current.volume = 0.6;
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 767);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return true;
@@ -124,11 +148,14 @@ export default function App() {
     typingLoopRef.current.currentTime = 0;
   }, []);
 
-  // --- AGENT REGISTRATION ---
-  const registerAgent = useCallback((name) => {
-    const safeName = name.trim().toUpperCase() || "AGENT";
+  const registerAgent = useCallback((name, key) => {
+    const safeName = name.trim().toUpperCase();
+    const safeKey = key.trim();
+    
     setAgentName(safeName);
+    setAgentCipherKey(safeKey);
     localStorage.setItem("agentName", safeName);
+    localStorage.setItem("agentCipherKey", safeKey);
   }, []);
 
   const audioProps = {
@@ -195,6 +222,12 @@ export default function App() {
   if (appState === AppState.NAVIGATING) {
     return <Loader {...audioProps} />;
   }
+  
+  const casePageProps = {
+    setLiveCaseData,
+    liveCaseData,
+    isMobile 
+  };
 
   return (
     <>
@@ -203,7 +236,13 @@ export default function App() {
       {appState === AppState.INSIDER && (
         <>
           <Navbar {...audioProps} />
-          {!onCasePage && <MissionLog agentName={agentName} />}
+          {!isMobile && !onCasePage && agentName && <MissionLog agentName={agentName} />}
+          {isMobile && appState === AppState.INSIDER && (
+            <MobileHudToggle 
+                agentName={agentName} 
+                {...liveCaseData} 
+            />
+          )}
         </>
       )}
 
@@ -218,7 +257,7 @@ export default function App() {
                   onPreloaderFinish={handlePreloaderFinish}
                   appState={appState}
                   agentName={agentName}
-                  updateAgentName={registerAgent}
+                  registerAgent={registerAgent}
                   {...audioProps}
                 />
               }
@@ -235,8 +274,12 @@ export default function App() {
               path="/case/:caseId"
               element={
                 <ProtectedRoute>
-                  {/* ✅ Passing agentName prop here */}
-                  <CaseDetailPage agentName={agentName} {...audioProps} />
+                  <CaseDetailPage 
+                    agentName={agentName} 
+                    {...audioProps} 
+                    {...casePageProps} 
+                    isMobile={isMobile} 
+                  />
                 </ProtectedRoute>
               }
             />
@@ -251,7 +294,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
-
       <Footer {...audioProps} />
     </>
   );
