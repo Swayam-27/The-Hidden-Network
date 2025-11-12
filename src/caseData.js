@@ -10,7 +10,7 @@ export const caseData = {
     meta: "Year: 2009-2019",
     imgSrc: "/assets/project-raven.png",
 
-    totalAudioDurationMs: 814000,
+    totalAudioDurationMs: 607000,
 
     intro: {
       type: "audio",
@@ -171,7 +171,7 @@ export const caseData = {
     meta: "Year: 2014-2018 // Status: Defunct",
     imgSrc: "/assets/ca.png",
 
-    totalAudioDurationMs: 1940000,
+    totalAudioDurationMs: 1647000,
 
     intro: {
       type: "audio",
@@ -358,7 +358,7 @@ export const caseData = {
     meta: "Year: 2016 // Status: Public",
     imgSrc: "/assets/panama-papers.png",
 
-    totalAudioDurationMs: 1083000,
+    totalAudioDurationMs: 736000,
 
     intro: {
       type: "audio",

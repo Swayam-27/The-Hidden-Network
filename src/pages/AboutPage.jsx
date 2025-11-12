@@ -289,7 +289,7 @@ const AboutPage = ({
       setShouldAnimate(true);
       grantAccess();
     } else {
-      setFeedback('// ACCESS DENIED //');
+      setFeedback('ACCESS DENIED');
       setIsShaking(true);
       setInputValue('');
       setTimeout(() => {
@@ -307,9 +307,9 @@ const AboutPage = ({
       setIsFinalRevealed(true);
       localStorage.setItem('creatorDeclassified', 'true');
       localStorage.setItem('creatorPasswordVersion', PASSWORD_VERSION);
-      setFinalFeedback('// IDENTITY DECLASSIFIED. //');
+      setFinalFeedback('IDENTITY DECLASSIFIED');
     } else {
-      setFinalFeedback('// INCORRECT PROTOCOL //');
+      setFinalFeedback('INCORRECT PROTOCOL');
       setIsFinalShaking(true);
       setFinalInputValue('');
       setTimeout(() => {
@@ -429,7 +429,7 @@ const AboutPage = ({
                     ENTER THESIS PROTOCOL:
                   </label>
                   <p className="terminal-hint">
-                    This protocol is provided externally to the evaluator.
+                    This protocol is provided externally to the Professor.
                   </p>
                   <input
                     ref={finalInputRef}
@@ -444,7 +444,7 @@ const AboutPage = ({
                     <button
                       type="submit"
                       className="decrypt-button cursor-target"
-                      style={{ marginTop: '1.JULrem' }}
+                      style={{ marginTop: '1.5rem' }}
                       onMouseEnter={playHover}
                       onClick={playClick}
                     >
@@ -464,7 +464,7 @@ const AboutPage = ({
                       textShadow: '0 0 10px var(--glow-color-red)',
                     }}
                   >
-                    // SECURITY OVERRIDE DETECTED //
+                    SECURITY OVERRIDE DETECTED
                   </p>
                   <p
                     className="about-content-text"
@@ -509,8 +509,7 @@ const AboutPage = ({
                       <strong>PROJECT TYPE:</strong> Interactive Case Study
                     </p>
                     <p className="about-content-text">
-                      <strong>BUILT WITH:</strong> React.js, GSAP, Custom CSS,
-                      LocalStorage API
+                      <strong>BUILT WITH:</strong> React.js, GSAP, Custom CSS, Supabase, Netlify Functions, LocalStorage API
                     </p>
                     <p className="about-content-text">
                       <strong>ACADEMIC YEAR:</strong> 2024-2028
@@ -526,12 +525,14 @@ const AboutPage = ({
                         paddingTop: '1rem',
                       }}
                     >
-                      "The Hidden Network" is an experiential investigation into
-                      covert operations, intelligence analysis, and the
-                      signal-from-noise paradigm. The persona of "Cipher" serves
-                      as an anonymous curator throughout the archive,
-                      maintaining narrative immersion while exploring themes of
-                      secrecy, surveillance, and information warfare.
+                      "The Hidden Network", a website built to keep you engaged, making the user understand covert operations better using narrative interactivity to simulate real intelligence work.
+                      <br /><br />
+                      The idea came from a simple problem: understanding covert operations for roundtable talk, meant jumping between papers, each telling only fragments of the story. I wanted to build something that connected everything, a space where you could learn the operation from start to finish, through experience.
+                      <br /><br />
+                      What started as a research and explanation based through audio briefing website quickly transformed into something much larger. One idea kept leading to another the puzzles, the console, the audio, the HUD, the leaderboard until the system felt immersive and unique. Every feature was created and added to preserve immersion: the custom cursor, the audio player, the whole "CIPHER" persona  and the terminal interface all custom designed to keep you inside the environment, not just on a website.
+                      <br /><br />
+                      This project is the result of constant iteration and imagination. And it's still evolving, I plan to expand it with new cases, puzzle types, and more complex backend systems. But no matter how advanced it becomes, its purpose will always remain the same: to make learning about secrecy and intelligence feel like discovery, not theory.
+                      <br /><br />
                     </p>
                   </div>
                 </div>

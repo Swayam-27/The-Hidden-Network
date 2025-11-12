@@ -1,8 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { caseData } from "../caseData";
 
 const allCaseIds = Object.keys(caseData);
 
+// Helper function to format time (00:00)
+const formatTimerDisplay = (timeInMs) => {
+  if (!timeInMs || !Number.isFinite(timeInMs) || timeInMs < 0)
+    return "00:00";
+  const totalSeconds = Math.floor(timeInMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+};
 
 const loadAllCaseData = () => {
   return allCaseIds.map((id) => {
@@ -18,36 +29,50 @@ const loadAllCaseData = () => {
         .map((s) => s[0])
         .join("")
         .toUpperCase()
-        .slice(0, 4), 
+        .slice(0, 4),
       rank: "N/A",
       rankClass: "rank-n",
       attempts: "N/A",
-      avgTime: "N/A",
+      avgTimeDisplay: "N/A", 
       isPending,
       isCompleted: isCompleted,
     };
 
     if (isCompleted) {
-      const time = parseInt(localStorage.getItem(`case_${id}_time`) || 0, 10);
       const attempts = parseInt(
         localStorage.getItem(`case_${id}_attempts`) || 0,
         10
       );
-      
+
       const savedRank = localStorage.getItem(`case_${id}_rank`);
       const savedRankClass = localStorage.getItem(`case_${id}_rankClass`);
-      
+
+      // Load the Net Solve Time (Total Net Time)
+      const netSolveTimeMs = parseInt(
+        localStorage.getItem(`case_${id}_netSolveTimeMs`) || 0,
+        10
+      );
+
       const puzzleCount =
         caseInfo.episodes.filter((ep) => ep.puzzle).length +
         (caseInfo.firstPuzzle ? 1 : 0);
+
+      let avgTimeDisplay = "N/A";
+      if (puzzleCount > 0 && netSolveTimeMs > 0) {
+        // Correct calculation: Total Net Time / Puzzle Count = Average Time Per Puzzle
+        const avgMsPerPuzzle = netSolveTimeMs / puzzleCount; 
+        avgTimeDisplay = formatTimerDisplay(avgMsPerPuzzle);
+      } else if (netSolveTimeMs === 0 && puzzleCount > 0) {
+        // Handles the non-zero speedrunner case
+        avgTimeDisplay = "00:00";
+      }
 
       stats = {
         ...stats,
         rank: savedRank || "N/A",
         rankClass: savedRankClass || "rank-n",
         attempts,
-        avgTime:
-          puzzleCount > 0 ? (time / 1000 / 60 / puzzleCount).toFixed(1) : "N/A",
+        avgTimeDisplay: avgTimeDisplay, 
       };
     }
     return stats;
@@ -123,7 +148,8 @@ const MissionLog = ({ agentName }) => {
                       </strong>
                     </span>
                     <span className="log-stat-line">
-                      Time Taken: <strong>{caseStats.avgTime} MIN/PZ</strong>
+                      Avg. Solve Time:{" "}
+                      <strong>{caseStats.avgTimeDisplay}</strong>
                     </span>
                   </>
                 ) : (

@@ -4230,3 +4230,36 @@ body.no-scroll {
   font-size: 0.9rem;
   font-style: italic;
 }
+
+.leaderboard-hud-fixed {
+    height: auto;
+    max-height: 1500px; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-table-minimal thead {
+    display: table; 
+    width: 100%;
+    table-layout: fixed;
+    flex-shrink: 0; 
+}
+
+.leaderboard-table-minimal tbody {
+    display: block; 
+    max-height: 500px; 
+    overflow-y: auto; 
+    flex-grow: 1; 
+}
+
+.leaderboard-table-minimal tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.leaderboard-table-minimal {
+    width: 100%;
+    table-layout: fixed;
+}

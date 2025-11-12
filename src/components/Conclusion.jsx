@@ -20,25 +20,39 @@ const calculateRank = (
   totalAudioDurationMs
 ) => {
   if (puzzleCount === 0) {
-    return { rank: "A-CLASS", title: "OPERATIONAL", rankClass: "rank-a" };
+    return {
+      rank: "A-CLASS",
+      title: "OPERATIONAL",
+      rankClass: "rank-a",
+      netSolveTimeMs: 0, 
+    };
   }
 
-  const solveTimeMs = Math.max(0, totalTimeMs - totalAudioDurationMs);
+  const rawSolveTimeMs = totalTimeMs - (totalAudioDurationMs || 0);
+
+  const solveTimeMs = rawSolveTimeMs < 0 ? totalTimeMs : rawSolveTimeMs;
+
   const avgSolveTimeMs = solveTimeMs / puzzleCount;
 
+  let rank = "C-CLASS";
+  let title = "RECRUIT";
+  let rankClass = "rank-c";
+
   if (totalAttempts === 0 && avgSolveTimeMs < 90000) {
-    return { rank: "S-CLASS", title: "GHOST PROTOCOL", rankClass: "rank-s" };
+    rank = "S-CLASS";
+    title = "GHOST PROTOCOL";
+    rankClass = "rank-s";
+  } else if (totalAttempts <= puzzleCount / 2 && avgSolveTimeMs < 180000) {
+    rank = "A-CLASS";
+    title = "FIELD AGENT";
+    rankClass = "rank-a";
+  } else if (totalAttempts <= puzzleCount || avgSolveTimeMs < 300000) {
+    rank = "B-CLASS";
+    title = "ANALYST";
+    rankClass = "rank-b";
   }
 
-  if (totalAttempts <= puzzleCount / 2 && avgSolveTimeMs < 180000) {
-    return { rank: "A-CLASS", title: "FIELD AGENT", rankClass: "rank-a" };
-  }
-
-  if (totalAttempts <= puzzleCount || avgSolveTimeMs < 300000) {
-    return { rank: "B-CLASS", title: "ANALYST", rankClass: "rank-b" };
-  }
-
-  return { rank: "C-CLASS", title: "RECRUIT", rankClass: "rank-c" };
+  return { rank, title, rankClass, netSolveTimeMs: solveTimeMs };
 };
 
 const Conclusion = ({
@@ -53,20 +67,22 @@ const Conclusion = ({
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const cipherKey = localStorage.getItem("agentCipherKey");
 
-  const { rank, title, rankClass } = calculateRank(
+  const { rank, title, rankClass, netSolveTimeMs } = calculateRank(
     totalTimeMs,
     totalAttempts,
     episodeCount,
     totalAudioDurationMs || 0
   );
 
+  // --- FIX: SAVING netSolveTimeMs TO LOCAL STORAGE ---
   useEffect(() => {
     const normalizedCaseId = caseId?.toString().trim().toLowerCase().replace(/\s+/g, "-");
     if (localStorage.getItem(`case_${normalizedCaseId}_completed`) === "true") {
         localStorage.setItem(`case_${normalizedCaseId}_rank`, rank);
         localStorage.setItem(`case_${normalizedCaseId}_rankClass`, rankClass);
+        localStorage.setItem(`case_${normalizedCaseId}_netSolveTimeMs`, netSolveTimeMs.toString()); 
     }
-  }, [caseId, rank, rankClass]);
+  }, [caseId, rank, rankClass, netSolveTimeMs]);
 
   const handleSubmission = useCallback(async () => {
     if (submissionStatus !== null || !agentName || !cipherKey) {
@@ -83,6 +99,7 @@ const Conclusion = ({
       .toLowerCase()
       .replace(/\s+/g, "-");
 
+
     const payload = {
       agentName,
       caseId: normalizedCaseId,
@@ -90,6 +107,7 @@ const Conclusion = ({
       totalAttempts,
       rankClass: rank,
       cipherKey,
+      netSolveTimeMs: netSolveTimeMs,
     };
 
     try {
@@ -127,19 +145,13 @@ const Conclusion = ({
     rank,
     cipherKey,
     submissionStatus,
+    netSolveTimeMs, 
   ]);
 
   useEffect(() => {
     handleSubmission();
   }, [handleSubmission]);
 
-  // const statusMessage = {
-  //   SUCCESS: "SCORE SUBMITTED. CHECK GLOBAL LEADERBOARD.",
-  //   ALREADY_RECORDED: "SCORE NOT SUBMITTED: FIRST ATTEMPT ALREADY LOGGED.",
-  //   FAILED: "TRANSMISSION FAILED. CHECK CONSOLE FOR ERRORS.",
-  //   "TRANSMITTING...": "TRANSMITTING SCORE TO GLOBAL ARCHIVE...",
-  //   NOT_LOGGED_IN: "LOCAL SCORE. LOG IN TO SUBMIT TO GLOBAL LEADERBOARD.",
-  // };
 
   return (
     <div className="conclusion-wrapper">

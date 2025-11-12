@@ -14,12 +14,22 @@ exports.handler = async (event) => {
     }
 
     const data = JSON.parse(event.body);
-    const { agentName, caseId, totalTimeMs, totalAttempts, rankClass, cipherKey } = data;
+    const {
+      agentName,
+      caseId,
+      totalTimeMs,
+      totalAttempts,
+      rankClass,
+      cipherKey,
+      netSolveTimeMs, 
+    } = data;
 
-    if (!agentName || !caseId || !cipherKey) {
+    if (!agentName || !caseId || !cipherKey || netSolveTimeMs === undefined) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ message: "Missing required fields." }),
+        body: JSON.stringify({
+          message: "Missing required fields (agentName, caseId, cipherKey, netSolveTimeMs).",
+        }),
       };
     }
 
@@ -31,6 +41,7 @@ exports.handler = async (event) => {
       safeName,
       safeCase,
       totalTimeMs,
+      netSolveTimeMs,
       totalAttempts,
       rankClass,
     });
@@ -59,11 +70,14 @@ exports.handler = async (event) => {
         }),
       };
     }
+
+    // 3. Add the new column to the insert object
     const { error: insertError } = await supabase.from("global_scores").insert([
       {
         agent_name: safeName,
         case_id: safeCase,
-        time_ms: totalTimeMs,
+        time_ms: totalTimeMs, 
+        net_solve_time_ms: netSolveTimeMs, 
         total_wrong_attempts: totalAttempts,
         rank_class: rankClass,
         cipher_key: safeKey,
